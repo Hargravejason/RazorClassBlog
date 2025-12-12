@@ -1,0 +1,290 @@
+﻿@page "{id?}"
+@using RazorClassBlog.EnumsandConstants
+@model RazorClassBlog.Areas.BlogAdmin.EditModel
+
+@{
+	var isNew = string.IsNullOrEmpty(Model.Post.Id);
+	var title = isNew ? "Create Blog Post" : "Edit Blog Post";
+	ViewData["Title"] = title;
+}
+
+<h1 class="mt-3 mb-3">@title</h1>
+@{
+	var nowUtc = DateTimeOffset.UtcNow;
+	var isScheduled = Model.Post.Status == BlogPostStatus.Published
+										&& Model.Post.PublishedUtc.HasValue
+										&& Model.Post.PublishedUtc.Value > nowUtc;
+}
+
+@if (isScheduled)
+{
+	<div class="alert alert-info mt-2">
+		<strong>This post is scheduled.</strong>
+		It will be visible on the public blog on
+		@Model.Post.PublishedUtc!.Value.ToLocalTime().ToString("MMMM dd, yyyy h:mm tt").
+	</div>
+}
+
+<form method="post">
+	<input type="hidden" asp-for="Post.Id" />
+	<input type="hidden" asp-for="Post.BlogKey" />
+
+	<div class="row">
+		<div class="col-lg-8">
+			<div class="mb-3">
+				<label asp-for="Post.Title" class="form-label"></label>
+				<input asp-for="Post.Title" class="form-control" />
+				<span asp-validation-for="Post.Title" class="text-danger"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Post.Slug" class="form-label">Slug</label>
+				<input asp-for="Post.Slug" class="form-control" />
+				<span class="form-text">
+					Leave empty to auto-generate from the title. Used in the URL.
+				</span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Post.Summary" class="form-label"></label>
+				<textarea asp-for="Post.Summary" class="form-control" rows="2"></textarea>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Post.Content" class="form-label">Content</label>
+				@* This textarea will be transformed by TinyMCE *@
+				<textarea asp-for="Post.Content" class="form-control" rows="15"></textarea>
+				<span class="form-text">
+					Use the editor to format your post. Content is stored as HTML.
+				</span>
+			</div>
+		</div>
+
+		<div class="col-lg-4">
+			<div class="border rounded-3 p-3 mb-3 bg-light">
+				<h2 class="h6 mb-3">Publishing</h2>
+
+				<div class="mb-3">
+					<label asp-for="Post.AuthorName" class="form-label">Author</label>
+					<input asp-for="Post.AuthorName" class="form-control" />
+					<span class="form-text">
+						Shown on the post. Can be a person's name (e.g., "Jane Doe") or an entity
+						(e.g., "Acme Marketing Team").
+					</span>
+					<span asp-validation-for="Post.AuthorName" class="text-danger"></span>
+				</div>
+
+				<div class="form-check form-switch mb-3">
+					<input asp-for="Publish" class="form-check-input" id="publishToggle" />
+					<label asp-for="Publish" class="form-check-label">Published</label>
+					<div class="form-text">
+						Turn this on to publish now or schedule for a future date.
+					</div>
+				</div>
+
+				<div id="publishDateContainer" class="mb-3" style="display:none;">
+					<label class="form-label">Publish date &amp; time</label>
+
+					@* Local UI only *@
+					<input type="datetime-local" class="form-control" id="publishLocal" value="@(Model.Post.PublishedUtc.HasValue? Model.Post.PublishedUtc.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")" />
+
+					@* Hidden UTC bound to model *@
+					<input type="hidden" asp-for="Post.PublishedUtc" id="publishUtc" />
+
+					<span class="form-text">
+						Leave as-is to publish immediately, or set a future time to schedule.
+					</span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Tags (comma-separated)</label>
+					<input asp-for="TagsCsv" class="form-control" />
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Post.HeroImageUrl" class="form-label">Hero image URL</label>
+					<input asp-for="Post.HeroImageUrl" class="form-control" />
+				</div>
+			</div>
+
+			<div class="d-flex justify-content-between">
+				<a asp-page="Index" class="btn btn-outline-secondary">
+					Back to list
+				</a>
+				<button type="submit" class="btn btn-primary">
+					Save
+				</button>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+	<script src="~/lib/tinymce/tinymce.min.js"></script>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+
+			// TinyMCE initialization (unchanged)
+			tinymce.init({
+					selector: 'textarea[name="Post.Content"]',
+					height: 500,
+					menubar: false,
+					plugins: [
+							'advlist autolink lists link image charmap preview anchor',
+							'searchreplace visualblocks code fullscreen',
+							'media table code help wordcount'
+					],
+					toolbar: 'undo redo | formatselect | ' +
+										'bold italic underline | forecolor backcolor | ' +
+										'alignleft aligncenter alignright alignjustify | ' +
+										'bullist numlist outdent indent | removeformat | help',
+					content_style: 'body { font-family: system-ui; font-size:14px }'
+			});
+
+			// Elements
+			const publishToggle = document.getElementById("publishToggle");
+			const dateContainer = document.getElementById("publishDateContainer");
+			const localInput = document.getElementById("publishLocal");
+			const utcInput = document.getElementById("publishUtc");
+			const form = document.querySelector("form");
+
+			// Utility: format current time for <input type="datetime-local">
+			function getCurrentLocalDatetimeString() {
+					const now = new Date();
+					const pad = n => n.toString().padStart(2, "0");
+					return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` +
+									`T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+			}
+
+			// Initial state on load
+			function refreshVisibility() {
+					if (publishToggle.checked) {
+							dateContainer.style.display = "";
+							if (!localInput.value) {
+									localInput.value = getCurrentLocalDatetimeString();
+							}
+					} else {
+							dateContainer.style.display = "none";
+							localInput.value = "";
+							utcInput.value = "";
+					}
+			}
+
+			// Toggle logic
+			publishToggle.addEventListener("change", refreshVisibility);
+			refreshVisibility(); // run on page load
+
+			// Form submission logic
+			form.addEventListener("submit", function () {
+					if (!publishToggle.checked) {
+							utcInput.value = "";
+							return;
+					}
+
+					if (!localInput.value) {
+							utcInput.value = ""; // server will use "now"
+							return;
+					}
+
+					// Convert local → UTC
+					const localDate = new Date(localInput.value);
+					if (!isNaN(localDate.getTime())) {
+							utcInput.value = localDate.toISOString();
+					} else {
+							utcInput.value = "";
+					}
+			});
+
+			const autosaveIntervalMs = 30000; // every 30 seconds
+			let autosaveTimer = null;
+			let isSubmitting = false;
+			let lastAutosaveLabel = null;
+
+			// Small label to show autosave feedback
+			function ensureAutosaveLabel() {
+				if (!lastAutosaveLabel) {
+						lastAutosaveLabel = document.createElement("div");
+						lastAutosaveLabel.className = "small text-muted mt-2";
+						// put it under the Save/Back buttons or wherever you like
+						const buttonsRow = document.querySelector(".col-lg-4 .d-flex");
+						if (buttonsRow) {
+								buttonsRow.insertAdjacentElement("afterend", lastAutosaveLabel);
+						}
+				}
+				return lastAutosaveLabel;
+			}
+
+			async function autosave() {
+				if (isSubmitting) return; // don't autosave while a full submit is happening
+
+				if (publishToggle.checked) {
+					// Don't autosave when user has chosen to publish; force them to click Save for that
+					return;
+				}
+
+				// Make sure TinyMCE content is pushed into the textarea
+				if (tinymce && tinymce.get) {
+						const editor = tinymce.get('Post_Content');
+						if (editor) {
+								editor.save(); // syncs editor -> textarea
+						}
+				}
+
+				const label = ensureAutosaveLabel();
+				label.textContent = "Autosaving...";
+
+				const formData = new FormData(form);
+				try {
+						const response = await fetch("?handler=Autosave", {
+								method: "POST",
+								body: formData
+						});
+
+						if (!response.ok) {
+								label.textContent = "Autosave failed (network error).";
+								return;
+						}
+
+						const json = await response.json();
+
+						if (json && json.id) {
+								// Update hidden Id if it was a new post
+								const idInput = document.querySelector('input[name="Post.Id"]');
+								if (idInput && !idInput.value) {
+										idInput.value = json.id;
+								}
+
+								const when = new Date().toLocaleTimeString();
+								label.textContent = "Draft autosaved at " + when;
+						}
+						else {
+								label.textContent = "Autosave completed.";
+						}
+				} catch (err) {
+						console.error("Autosave error", err);
+						label.textContent = "Autosave failed.";
+				}
+			}
+
+			function startAutosave() {
+					if (autosaveTimer) {
+							clearInterval(autosaveTimer);
+					}
+					autosaveTimer = setInterval(autosave, autosaveIntervalMs);
+			}
+
+			// Start autosave when page is ready
+			startAutosave();
+
+			// Mark full submit so autosave doesn't interfere
+			form.addEventListener("submit", function () {
+					isSubmitting = true;
+					if (autosaveTimer) {
+							clearInterval(autosaveTimer);
+					}
+			});
+		});
+	</script>
+}
