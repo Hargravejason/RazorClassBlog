@@ -20,10 +20,16 @@
 
 		<VersionPrefix>0.0.1</VersionPrefix>
 
-		<!-- strongly recommended -->
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<RepositoryUrl>https://your.repo.url.here</RepositoryUrl>
+
+		<RepositoryUrl>https://github.com/Hargravejason/RazorClassBlog</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageProjectUrl>https://github.com/Hargravejason/RazorClassBlog</PackageProjectUrl>
+
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
+
+		<PackageTags>blog;razor-pages;rcl;seo;aspnetcore;bootstrap</PackageTags>
 	</PropertyGroup>
 	
   <ItemGroup>
@@ -32,6 +38,7 @@
 
 	<ItemGroup>
 		<None Include="README.md" Pack="true" PackagePath="\" />
+		<None Include="icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
