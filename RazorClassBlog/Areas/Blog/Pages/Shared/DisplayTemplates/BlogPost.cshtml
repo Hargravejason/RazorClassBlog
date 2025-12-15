@@ -7,11 +7,18 @@
   <div class="card h-100 shadow-sm border-0">
     @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl))
     {
-      <img src="@Model.HeroImageUrl" class="card-img-top" alt="@Model.Title" />
+      <div class="ratio ratio-16x9 mb-2 rounded-3 overflow-hidden">
+        <img src="@Model.HeroImageUrl"
+             class="w-100 h-100"
+             style="object-fit:cover;"
+             alt="@Model.Title"
+             loading="lazy"
+             decoding="async" />
+      </div>
     }
 
     <div class="card-body">
-      <h2 class="h4 card-title">
+      <h2 class="h5 card-title mb-1">
         <a asp-page="Post" asp-route-year="@published.Year" asp-route-month="@published.Month" asp-route-slug="@Model.Slug" class="stretched-link text-decoration-none">
           @Model.Title
         </a>

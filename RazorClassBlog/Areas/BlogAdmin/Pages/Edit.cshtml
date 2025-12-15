@@ -28,11 +28,12 @@
 <form method="post">
 	<input type="hidden" asp-for="Post.Id" />
 	<input type="hidden" asp-for="Post.BlogKey" />
+	<input type="hidden" asp-for="Post.CreatedUtc" />
 
 	<div class="row">
 		<div class="col-lg-8">
 			<div class="mb-3">
-				<label asp-for="Post.Title" class="form-label"></label>
+				<label asp-for="Post.Title" class="form-label"></label>&nbsp;<i class="small">with target keywords (kept < 60 characters)</i>
 				<input asp-for="Post.Title" class="form-control" />
 				<span asp-validation-for="Post.Title" class="text-danger"></span>
 			</div>
@@ -46,7 +47,7 @@
 			</div>
 
 			<div class="mb-3">
-				<label asp-for="Post.Summary" class="form-label"></label>
+				<label asp-for="Post.Summary" class="form-label"></label>&nbsp;<i class="small">~150-160 characters summarizing the content to drive clicks</i>
 				<textarea asp-for="Post.Summary" class="form-control" rows="2"></textarea>
 			</div>
 

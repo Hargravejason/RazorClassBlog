@@ -18,9 +18,11 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>0.0.2</VersionPrefix>
-
+		<VersionPrefix>0.0.3</VersionPrefix>
+		<PackageReleaseNotes>Fixed issue with hero image not showing on post page. And revised the Readme to show properly.</PackageReleaseNotes>
+		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		
 
 		<RepositoryUrl>https://github.com/Hargravejason/RazorClassBlog</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>

@@ -63,16 +63,16 @@ else
 
       @if (!string.IsNullOrWhiteSpace(post.HeroImageUrl))
       {
-        <div class="mt-3">
-          <img src="@post.HeroImageUrl"
-               class="img-fluid rounded"
-               alt="@post.Title" />
-        </div>
+        <figure class="blog-hero mb-3">
+          <div class="ratio ratio-21x9 rounded-4 overflow-hidden shadow-sm">
+            <img src="@post.HeroImageUrl" class="w-100 h-100" style="object-fit:cover;" alt="@post.Title" loading="lazy" decoding="async" />
+          </div>
+          <figcaption class="text-muted small mt-2">@post.Title</figcaption>
+        </figure>
       }
     </header>
 
     <section class="blog-content lh-lg">
-      @* If you're storing Markdown, convert to HTML in the PageModel before rendering *@
       @Html.Raw(post.Content)
     </section>
 
@@ -121,6 +121,7 @@ else
           "@@type": @(post.AuthorName == Options.Value.DefaultOrganizationName ? "Organization" : "Person")",
           "name": "@(post.AuthorName ?? Options.Value.DefaultOrganizationName ?? "Unknown")"
         },
+        "description":"@ViewData["Description"]",
         "mainEntityOfPage": {
           "@@type": "WebPage",
           "@@id": "@ViewData["canonical"]"
