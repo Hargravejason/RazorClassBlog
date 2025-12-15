@@ -85,8 +85,8 @@
 
 				<div id="publishDateContainer" class="mb-3" style="display:none;">
 					<label class="form-label">Publish date &amp; time</label>
-					<input asp-for="Post.PublishedUtc" type="datetime-local" class="form-control" data-value="@(Model.Post.PublishedUtc.HasValue? Model.Post.PublishedUtc.Value.ToString("O") : "")" />
-
+					<input id="publishLocal" type="datetime-local" class="form-control" />
+					<input type="hidden" asp-for="Post.PublishedUtc" />
 					<span class="form-text">
 						Leave as-is to publish immediately, or set a future time to schedule.
 					</span>
@@ -143,6 +143,7 @@
 			const publishToggle = document.getElementById("publishToggle");
 			const dateContainer = document.getElementById("publishDateContainer");
 			const publishUtc = document.getElementById("Post_PublishedUtc");
+			const localInput = document.getElementById("publishLocal");
 			const form = document.querySelector("form");
 
 			// Utility: format current time for <input type="datetime-local">
@@ -160,44 +161,42 @@
 			function refreshVisibility() {
 					if (publishToggle.checked) {
 							dateContainer.style.display = "";
-							if(publishUtc.getAttribute("data-value")) {
-								const d = new Date(publishUtc.getAttribute("data-value"));
-								publishUtc.value = getCurrentLocalDatetimeString(d);
-								publishUtc.setAttribute("data-value", null);
+							if(publishUtc.value) {
+								const d = new Date(publishUtc.value);
+								localInput.value = getCurrentLocalDatetimeString(d);
 							} 
-							if (!publishUtc.value) {
-									publishUtc.value = getCurrentLocalDatetimeString();
+							if (!localInput.value) {
+									localInput.value = getCurrentLocalDatetimeString();
 							}
 					} else {
 							dateContainer.style.display = "none";
-							publishUtc.value = "";
+							localInput.value = "";
 					}
+			}
+
+			function localToUtcIso() {
+				// If publish isn't enabled, clear UTC
+				if (publishToggle && !publishToggle.checked) {
+					publishUtc.value = "";
+					return;
+				}
+
+				// If local is empty, clear UTC
+				if (!localInput.value) {
+					publishUtc.value = "";
+					return;
+				}
+
+				// Convert local datetime-local string to UTC ISO
+				const d = new Date(localInput.value); // interpreted as local time
+				publishUtc.value = isNaN(d.getTime()) ? "" : d.toISOString();
 			}
 
 			// Toggle logic
 			publishToggle.addEventListener("change", refreshVisibility);
+			localInput.addEventListener("change", localToUtcIso);
+			localInput.addEventListener("input", localToUtcIso);
 			refreshVisibility(); // run on page load
-
-			// Form submission logic
-			form.addEventListener("submit", function () {
-					if (!publishToggle.checked) {
-							publishUtc.value = "";
-							return;
-					}
-
-					if (!localInput.value) {
-							publishUtc.value = ""; // server will use "now"
-							return;
-					}
-
-					// Convert local → UTC
-					const localDate = new Date(localInput.value);
-					if (!isNaN(localDate.getTime())) {
-							utcInput.value = localDate.toISOString();
-					} else {
-							utcInput.value = "";
-					}
-			});
 
 			const autosaveIntervalMs = 30000; // every 30 seconds
 			let autosaveTimer = null;

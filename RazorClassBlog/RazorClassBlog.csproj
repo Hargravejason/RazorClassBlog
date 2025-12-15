@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>0.0.4</VersionPrefix>
-		<PackageReleaseNotes>Updated BlogPosting ld+json to be a partial so its easy to override on the host app as needed.</PackageReleaseNotes>
+		<VersionPrefix>0.0.5</VersionPrefix>
+		<PackageReleaseNotes>Fixed bug with publishing dates and UTC.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
