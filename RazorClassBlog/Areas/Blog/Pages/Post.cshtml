@@ -110,23 +110,8 @@ else
         ]
       }
     </script>
-    <script type="application/ld+json">
-      {
-        "@@context": "https://schema.org",
-        "@@type": "BlogPosting",
-        "headline": "@post.Title",
-        "datePublished": "@(post.PublishedUtc?.UtcDateTime.ToString("O") ?? post.CreatedUtc.UtcDateTime.ToString("O"))",
-        "dateModified": "@(post.UpdatedUtc?.UtcDateTime.ToString("O") ?? post.CreatedUtc.UtcDateTime.ToString("O"))",
-        "author": {
-          "@@type": @(post.AuthorName == Options.Value.DefaultOrganizationName ? "Organization" : "Person")",
-          "name": "@(post.AuthorName ?? Options.Value.DefaultOrganizationName ?? "Unknown")"
-        },
-        "description":"@ViewData["Description"]",
-        "mainEntityOfPage": {
-          "@@type": "WebPage",
-          "@@id": "@ViewData["canonical"]"
-        }
-      }
-    </script>
+
+    @await Html.PartialAsync("_BlogPostingJSONLDPartial", post)
+   
   }
 }

@@ -1,0 +1,38 @@
+﻿@using Microsoft.Extensions.Options
+@model RazorClassBlog.Models.BlogPost;
+@inject IOptions<BlogOptions> Options;
+@* 
+  Custom JSON-LD for BlogPosting schema as needed
+*@
+@{
+  string heroImageUrl = Model.HeroImageUrl ?? "https://cdn.AcmeAces.com/images/HomePage.jpg";
+}
+<script type="application/ld+json">
+  {
+    "@@context": "https://schema.org",
+    "@@type": "BlogPosting",
+    "headline": "@Model.Title",
+    "description":"@ViewData["Description"]",
+    "datePublished": "@(Model.PublishedUtc?.UtcDateTime.ToString("O") ?? Model.CreatedUtc.UtcDateTime.ToString("O"))",
+    "dateModified": "@(Model.UpdatedUtc?.UtcDateTime.ToString("O") ?? Model.CreatedUtc.UtcDateTime.ToString("O"))",
+    "author": {
+      "@@type": "@(Model.AuthorName == Options.Value.DefaultOrganizationName ? "Organization" : "Person")",
+      "name": "@(Model.AuthorName ?? Options.Value.DefaultOrganizationName ?? "Unknown")"
+    },
+    "publisher": {
+      "@@type": "Organization",
+      "name": "@Options.Value.DefaultOrganizationName",
+      "logo": {
+        "@@type": "ImageObject",
+        "url": "@Options.Value.DefaultOrganizationImageURL"
+      }
+    },
+    "image": [
+      "@heroImageUrl"
+    ],
+    "mainEntityOfPage": {
+      "@@type": "WebPage",
+      "@@id": "@ViewData["canonical"]"
+    }
+  }
+</script>

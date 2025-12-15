@@ -21,7 +21,15 @@ public class BlogOptions
   /// </summary>
   public string BlogReason { get; set; } = "We share product updates, how-tos, and best practices to help you get more out of our platform.";
 
+  /// <summary>
+  /// Default Organization name if no user info is available.
+  /// </summary>
   public string? DefaultOrganizationName { get; set; }
+
+  /// <summary>
+  /// Default Organization image URL if no user info is available.
+  /// </summary>
+  public string? DefaultOrganizationImageURL { get; set; }
 
   /// <summary>
   /// Default page size for public blog list.

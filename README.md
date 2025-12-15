@@ -10,8 +10,8 @@ A lightweight, embeddable **blog system for ASP.NET Core Razor Pages**, delivere
 
 **RazorClassBlog** exists to solve a very specific problem:
 
-> “I need a simple, SEO-friendly blog inside my existing ASP.NET Core site —
-> not a full CMS, not a headless platform, and not a WordPress clone.”
+> "I need a simple, SEO-friendly blog inside my existing ASP.NET Core site —
+> not a full CMS, not a headless platform, and not a WordPress clone."
 
 This project provides:
 
@@ -85,14 +85,32 @@ Or reference the project directly during development.
 
 ## Basic setup
 
+## Database configuration
+
+The library depends on an `IBlogDbContext` abstraction.
+The host application supplies the concrete EF Core implementation.
+
+Example (Cosmos DB):
+
+```csharp
+builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
+    options.UseCosmos(
+        builder.Configuration["Cosmos:ConnectionString"],
+        builder.Configuration["Cosmos:DatabaseName"]));
+```
+
+
 ### Register services
 
 ```csharp
-builder.Services.AddBlogging(options =>
+builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
 {
     options.BlogKey = "main";
     options.PublicPageSize = 5;
     options.AdminPageSize = 25;
+
+    options.DefaultOrganizationName = "Acme Aces";        
+    options.DefaultOrganizationImageURL = "/images/acme-aces-logo.png"; 
 
     options.AdminRoles = new[] { "Admin", "BlogAdmin" };
     options.ReaderRoles = new[] { "User", "Customer" };
@@ -117,27 +135,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
 ```
-
----
-
-## Database configuration
-
-The library depends on an `IBlogDbContext` abstraction.
-The host application supplies the concrete EF Core implementation.
-
-Example (Cosmos DB):
-
-```csharp
-builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
-    options.UseCosmos(
-        builder.Configuration["Cosmos:ConnectionString"],
-        builder.Configuration["Cosmos:DatabaseName"]));
-
-builder.Services.AddScoped<IBlogDbContext>(sp =>
-    sp.GetRequiredService<CosmosBlogDbContext>());
-```
-
----
 
 ## Admin UI & security
 
@@ -169,15 +166,9 @@ When disabled:
 
 ## Publishing model
 
-* **Draft** – not visible publicly
-* **Published** – visible immediately
-* **Scheduled** – visible when `PublishedUtc <= UtcNow`
-
-Public visibility rule:
-
-```csharp
-Status == Published && PublishedUtc <= DateTimeOffset.UtcNow
-```
+* **Draft**: not visible publicly
+* **Published**: visible immediately
+* **Scheduled**: visible when `PublishedUtc <= UtcNow`
 
 ---
 
@@ -185,13 +176,13 @@ Status == Published && PublishedUtc <= DateTimeOffset.UtcNow
 
 Posts support an editable display author:
 
-* **AuthorId** – internal identifier (audit)
-* **AuthorName** – displayed author (person or organization)
+* **AuthorId**: internal identifier (audit)
+* **AuthorName**: displayed author (person or organization)
 
 Examples:
 
-* “Jane Doe”
-* “Acme Marketing Team”
+* "Jane Doe"
+* "Acme Marketing Team"
 
 ---
 

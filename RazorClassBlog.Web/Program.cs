@@ -27,6 +27,7 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
   options.PublicPageSize = 5;                           // show 5 posts per page publicly
   options.AdminPageSize = 25;                           // show 25 in admin list
   options.DefaultOrganizationName = "Acme Aces";        // default author name if no user info available
+  options.DefaultOrganizationImageURL = "https://cdn.AcmeAces.com/images/acme-aces-logo.png"; // default author image if no user info available
   //options.EnableAdminUi = false;                      // option to completely disable the admin UI - useful if you have a separate admin app
   //options.AdminRoles = new[] { "User", "BlogAdmin" }; // permssions to manage blog
   //options.ReaderRoles = new[] { "User", "Customer" }; // permission to be considered a "reader" (e.g. can comment)
