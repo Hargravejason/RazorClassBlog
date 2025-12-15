@@ -51,9 +51,6 @@ public class BlogService : IBlogService
 
     var now = DateTimeOffset.UtcNow;
 
-    if (post.CreatedUtc == default)
-      post.CreatedUtc = now;
-
     post.UpdatedUtc = now;
 
     if (publish)

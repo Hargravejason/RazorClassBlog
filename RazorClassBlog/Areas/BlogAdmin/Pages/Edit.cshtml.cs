@@ -89,7 +89,7 @@ public class EditModel : PageModel
     // If publishing and we have a publish time, ensure it isn't before creation
     if (Publish && Post.PublishedUtc.HasValue)
     {
-      if (Post.PublishedUtc.Value < Post.CreatedUtc)
+      if (Post.PublishedUtc.Value.ToUniversalTime() < Post.CreatedUtc)
       {
         ModelState.AddModelError("Post.PublishedUtc", "Publish date cannot be earlier than the created date.");
 

@@ -7,7 +7,7 @@
   if (post is not null)
   {
     ViewData["Title"] = post.Title;
-    var published = (post.PublishedUtc ?? post.CreatedUtc).ToLocalTime();
+    var published = (post.PublishedUtc ?? post.CreatedUtc);
     ViewData["canonical"] = Url.Page("Post", null, new { area = "Blog", year = published.Year, month = published.Month, slug = post.Slug }, protocol: HttpContext.Request.Scheme);
     ViewData["Description"] = string.IsNullOrWhiteSpace(post.Summary) ? (post.Content?.Length > 160 ? post.Content.Substring(0, 157) + "..." : post.Content) : post.Summary;
     ViewData["og:title"] = post.Title;
@@ -23,7 +23,7 @@
 }
 else
 {
-  var published = (post.PublishedUtc ?? post.CreatedUtc).ToLocalTime();
+  var published = (post.PublishedUtc ?? post.CreatedUtc);
 
   <nav aria-label="breadcrumb" class="mt-3">
     <ol class="breadcrumb">

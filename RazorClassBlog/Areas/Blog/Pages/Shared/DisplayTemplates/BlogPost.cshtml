@@ -1,7 +1,7 @@
 @model RazorClassBlog.Models.BlogPost;
 
 @{
-  var published = (Model.PublishedUtc ?? Model.CreatedUtc).ToLocalTime();
+  var published = Model.PublishedUtc ?? Model.CreatedUtc;
 }
 <article class="col">
   <div class="card h-100 shadow-sm border-0">
@@ -18,7 +18,9 @@
       </h2>
 
       <p class="card-subtitle mb-2 text-muted small">
+        <span data-type="datetime">
         @published.ToString("MMMM dd, yyyy")
+        </span>
         @if (!string.IsNullOrWhiteSpace(Model.AuthorName))
         {
           <span> &middot; @Model.AuthorName</span>

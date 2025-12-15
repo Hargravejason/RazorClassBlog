@@ -1,4 +1,8 @@
-﻿namespace RazorClassBlog.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using RazorClassBlog.Interfaces;
+using System.ComponentModel.DataAnnotations;
+
+namespace RazorClassBlog.Models;
 
 public class BlogOptions
 {
@@ -7,16 +11,26 @@ public class BlogOptions
   /// </summary>
   public string BlogKey { get; set; } = "main";
 
+  /// <summary>
+  /// Default blog title
+  /// </summary>
   public string BlogDescription { get; set; } = "News, updates, and tips from Our Company.";
 
+  /// <summary>
+  /// Default for message to user on why the blog exists, shows on the blog page
+  /// </summary>
   public string BlogReason { get; set; } = "We share product updates, how-tos, and best practices to help you get more out of our platform.";
 
   public string? DefaultOrganizationName { get; set; }
 
-  /// <summary>Default page size for public blog list.</summary>
+  /// <summary>
+  /// Default page size for public blog list.
+  /// </summary>
   public int PublicPageSize { get; set; } = 10;
 
-  /// <summary>Default page size for admin list.</summary>
+  /// <summary>
+  /// Default page size for admin list.
+  /// </summary>
   public int AdminPageSize { get; set; } = 20;
 
   /// <summary>
@@ -33,4 +47,5 @@ public class BlogOptions
   /// When false, the BlogAdmin area routes are removed (no /BlogAdmin endpoints at all).
   /// </summary>
   public bool EnableAdminUi { get; set; } = true;
+
 }

@@ -99,7 +99,7 @@ public class BlogRepository : IBlogRepository
     existing.AuthorId = post.AuthorId;
     existing.AuthorName = post.AuthorName;
     existing.UpdatedUtc = DateTime.UtcNow;
-    existing.PublishedUtc = post.PublishedUtc;
+    existing.PublishedUtc = post.PublishedUtc.HasValue ? post.PublishedUtc.Value.ToUniversalTime() : null;
     existing.Status = post.Status;
     existing.Title = post.Title;
     existing.Slug = post.Slug;

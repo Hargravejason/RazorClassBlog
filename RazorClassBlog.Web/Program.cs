@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using RazorClassBlog;
 using RazorClassBlog.EntityFramework;
 using RazorClassBlog.Interfaces;
-using RazorClassBlog.Models;
 using RazorClassBlog.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,28 +10,26 @@ var builder = WebApplication.CreateBuilder(args);
 // Add database contexts
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
-builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
-    options.UseCosmos(
-        connectionString: builder.Configuration["Cosmos:ConnectionString"] ?? throw new InvalidOperationException("Connection string 'Cosmos:ConnectionString' not found."),
-        databaseName: builder.Configuration["Cosmos:DatabaseName"] ?? throw new InvalidOperationException("Connection string 'Cosmos:DatabaseName' not found.")));
-builder.Services.AddScoped<IBlogDbContext>(sp => sp.GetRequiredService<CosmosBlogDbContext>());
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Register RCL services
-builder.Services.AddBlogging(options =>
+builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
+  options.UseCosmos(
+    connectionString: builder.Configuration["Cosmos:ConnectionString"] ?? throw new InvalidOperationException("Connection string 'Cosmos:ConnectionString' not found."),
+    databaseName: builder.Configuration["Cosmos:DatabaseName"] ?? throw new InvalidOperationException("Connection string 'Cosmos:DatabaseName' not found.")));
+builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
 {
   options.BlogKey = "main";                             // default; change if you want multiple blogs later
   options.PublicPageSize = 5;                           // show 5 posts per page publicly
   options.AdminPageSize = 25;                           // show 25 in admin list
+  options.DefaultOrganizationName = "Acme Aces";        // default author name if no user info available
+  //options.EnableAdminUi = false;                      // option to completely disable the admin UI - useful if you have a separate admin app
   //options.AdminRoles = new[] { "User", "BlogAdmin" }; // permssions to manage blog
   //options.ReaderRoles = new[] { "User", "Customer" }; // permission to be considered a "reader" (e.g. can comment)
-  //options.EnableAdminUi = false;                      // option to completely disable the admin UI - useful if you have a separate admin app
-  options.DefaultOrganizationName = "Acme Aces";        // default author name if no user info available
 });
 
 var app = builder.Build();

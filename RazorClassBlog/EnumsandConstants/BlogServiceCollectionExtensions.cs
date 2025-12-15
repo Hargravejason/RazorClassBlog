@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RazorClassBlog.Interfaces;
@@ -9,23 +10,20 @@ namespace RazorClassBlog;
 
 public static class BlogServiceCollectionExtensions
 {
-  public static IServiceCollection AddBlogging(this IServiceCollection services, Action<BlogOptions>? configure = null)
+  public static IServiceCollection AddBlogging <TContext> (this IServiceCollection services, Action<BlogOptions>? configure = null) where TContext : IBlogDbContext
   {
     if (configure is not null)
-    {
       services.Configure(configure);
-    }
     else
-    {
       services.Configure<BlogOptions>(_ => { });
-    }
-
-    // NOTE: Host still has to register IBlogDbContext -> concrete DbContext
 
     services.TryAddScoped<IBlogRepository, Repositories.BlogRepository>();
     services.TryAddScoped<IBlogService, BlogService>();
 
+    // Database configuration items
+    services.AddScoped<IBlogDbContext>(sp => sp.GetRequiredService<TContext>());
 
+    // Add role checks based on options
     using (var sp = services.BuildServiceProvider())
     {
       var blogOptions = sp.GetRequiredService<IOptions<BlogOptions>>().Value;

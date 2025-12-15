@@ -79,7 +79,7 @@ else
       <tbody>
         @foreach (var post in Model.Posts.Items)
         {
-          var published = post.PublishedUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-";
+          var published = post.PublishedUtc?.ToString("yyyy-MM-dd HH:mm") ?? "-";
 
           <tr>
             <td>
