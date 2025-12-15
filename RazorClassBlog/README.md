@@ -110,7 +110,7 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
     options.AdminPageSize = 25;
 
     options.DefaultOrganizationName = "Acme Aces";        
-    options.DefaultOrganizationImageURL = "/images/acme-aces-logo.png"; 
+    options.DefaultOrganizationImageURL = "https://cdn.AcmeAces.com/acme-aces-logo.png"; 
 
     options.AdminRoles = new[] { "Admin", "BlogAdmin" };
     options.ReaderRoles = new[] { "User", "Customer" };
