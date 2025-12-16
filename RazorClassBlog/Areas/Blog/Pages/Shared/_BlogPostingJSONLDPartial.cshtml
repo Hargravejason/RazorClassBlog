@@ -8,7 +8,7 @@
   Custom JSON-LD for BlogPosting schema as needed
 *@
 @{
-  string heroImageUrl = Model.HeroImageUrl ?? Options.Value.DefaultOrganizationImageURL;
+  string? heroImageUrl = Model.HeroImageUrl ?? Options.Value.DefaultOrganizationImageURL;
   var request = HttpContextAccessor.HttpContext?.Request;
   var blogUrl = Url.Page("Index", null, new { area = "Blog" }, protocol: request?.Scheme);
 }
@@ -32,9 +32,14 @@
         "url": "@Options.Value.DefaultOrganizationImageURL"
       }
     },
-    "image": [
-      "@heroImageUrl"
-    ],
+    @if (!string.IsNullOrEmpty(heroImageUrl))
+    {
+        <text>
+      "image": [
+        "@heroImageUrl"
+      ],
+        </text>
+    }
     "isPartOf": {
       "@@type": "Blog",
       "name": "@Options.Value.PublicDisplayName",
