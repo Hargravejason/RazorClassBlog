@@ -8,7 +8,7 @@
   Custom JSON-LD for BlogPosting schema as needed
 *@
 @{
-  string heroImageUrl = Model.HeroImageUrl ?? "https://cdn.AcmeAces.com/images/HomePage.jpg";
+  string heroImageUrl = Model.HeroImageUrl ?? Options.Value.DefaultOrganizationImageURL;
   var request = HttpContextAccessor.HttpContext?.Request;
   var blogUrl = Url.Page("Index", null, new { area = "Blog" }, protocol: request?.Scheme);
 }
