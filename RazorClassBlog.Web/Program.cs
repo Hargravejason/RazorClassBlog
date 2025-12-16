@@ -23,8 +23,8 @@ builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
     databaseName: builder.Configuration["Cosmos:DatabaseName"] ?? throw new InvalidOperationException("Connection string 'Cosmos:DatabaseName' not found.")));
 builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
 {
-  options.PublicRoutePrefix = "/property-insights";         // default; change if you want a different public blog route
-  options.PublicDisplayName = "Property Insights";      // default; change if you want a different public blog name
+  options.PublicRoutePrefix = "/articles";              // default; change if you want a different public blog route
+  options.PublicDisplayName = "Articles";               // default; change if you want a different public blog name
   options.BlogKey = "main";                             // default; change if you want multiple blogs later
   options.PublicPageSize = 5;                           // show 5 posts per page publicly
   options.AdminPageSize = 25;                           // show 25 in admin list

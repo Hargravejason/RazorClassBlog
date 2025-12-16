@@ -93,7 +93,7 @@ The host application supplies the concrete EF Core implementation.
 Example (SQL DB):
 
 ```csharp
-builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
+builder.Services.AddDbContext<SQLBlogDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BloggingDatabase")));
 ```
 
