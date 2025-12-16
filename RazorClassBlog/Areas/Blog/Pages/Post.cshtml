@@ -31,7 +31,7 @@ else
         <a asp-page="/Index" asp-area="">Home</a>
       </li>
       <li class="breadcrumb-item">
-        <a asp-page="Index" asp-area="Blog">Blog</a>
+        <a asp-page="Index" asp-area="Blog">@Options.Value.PublicDisplayName</a>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
         @post.Title
@@ -78,7 +78,7 @@ else
 
     <footer class="mt-5 pt-4 border-top">
       <a asp-page="Index" asp-area="Blog" class="btn btn-outline-secondary">
-        &laquo; Back to blog home
+        &laquo; Back to @Options.Value.PublicDisplayName home
       </a>
     </footer>
   </article>
@@ -98,7 +98,7 @@ else
           {
             "@@type": "ListItem",
             "position": 2,
-            "name": "Blog",
+            "name": "@Options.Value.PublicDisplayName",
             "item": "@Url.Page("Index", null, new { area = "Blog" }, protocol: Request.Scheme)"
           },
           {

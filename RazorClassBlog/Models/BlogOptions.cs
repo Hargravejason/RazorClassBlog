@@ -56,4 +56,13 @@ public class BlogOptions
   /// </summary>
   public bool EnableAdminUi { get; set; } = true;
 
+  /// <summary>
+  /// Public route prefix used by the host site (e.g. "/blog" or "/property-insights").
+  /// Must start with "/" and have no trailing slash.
+  /// </summary>
+  public string PublicRoutePrefix { get; set; } = "/blog";
+
+  /// <summary>What the site calls the blog in UI (nav, headings, breadcrumbs).</summary>
+  public string PublicDisplayName { get; set; } = "Blog";
+
 }

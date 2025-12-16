@@ -18,12 +18,11 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>0.0.5</VersionPrefix>
-		<PackageReleaseNotes>Fixed bug with publishing dates and UTC.</PackageReleaseNotes>
+		<VersionPrefix>0.0.6</VersionPrefix>
+		<PackageReleaseNotes>Updated app to support custom routing area. So if a user wants to have something other than 'Blog', they can specify it in the options. Such as 'Article'. This is only for the public facing side.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
-
 		<RepositoryUrl>https://github.com/Hargravejason/RazorClassBlog</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageProjectUrl>https://github.com/Hargravejason/RazorClassBlog</PackageProjectUrl>

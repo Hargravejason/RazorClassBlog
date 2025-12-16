@@ -10,7 +10,7 @@
   <meta name="description" content="@(ViewData["Description"] ?? "")">
   <link rel="canonical" href="@(ViewData["canonical"] ?? "")">
   
-  <meta property="og:title" content="@(ViewData["og:image"] ?? "")">
+  <meta property="og:title" content="@(ViewData["og:title"] ?? "")">
   <meta property="og:type" content="@(ViewData["og:type"] ?? "website")">
   <meta property="og:image" content="@(ViewData["og:image"] ?? "" )">
   <meta property="og:url" content="@(ViewData["og:url"] ?? "")">
@@ -34,7 +34,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="blog" asp-page="/Index">Blog</a>
+                            <a class="nav-link text-dark" asp-area="Blog" asp-page="/Index">Blog</a>
                         </li>
                         @if(Options.Value.EnableAdminUi){
                         <li class="nav-item">

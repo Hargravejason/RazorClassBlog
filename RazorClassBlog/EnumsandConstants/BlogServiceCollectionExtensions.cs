@@ -23,6 +23,8 @@ public static class BlogServiceCollectionExtensions
     // Database configuration items
     services.AddScoped<IBlogDbContext>(sp => sp.GetRequiredService<TContext>());
 
+    var razorPages = services.AddRazorPages();
+
     // Add role checks based on options
     using (var sp = services.BuildServiceProvider())
     {
@@ -65,11 +67,10 @@ public static class BlogServiceCollectionExtensions
           }
         });
       });
-
+      
       // Conditionally remove admin area routes
       if (!blogOptions.EnableAdminUi)
       {
-        var razorPages = services.AddRazorPages();
 
         razorPages.AddRazorPagesOptions(options =>
         {
@@ -83,6 +84,21 @@ public static class BlogServiceCollectionExtensions
             });
         });
       }
+
+      razorPages.AddRazorPagesOptions(o =>
+      {
+        // Map Blog index to /property-insights
+        o.Conventions.AddAreaPageRoute(
+            "Blog",  
+            "/Index",
+            blogOptions.PublicRoutePrefix);
+
+        // Map Blog post page to /property-insights/{year}/{month}/{slug}
+        o.Conventions.AddAreaPageRoute(
+            "Blog",
+            "/Post",
+            $"{blogOptions.PublicRoutePrefix}/{{year:int}}/{{month:int}}/{{slug}}");
+      });
     }
 
     return services;

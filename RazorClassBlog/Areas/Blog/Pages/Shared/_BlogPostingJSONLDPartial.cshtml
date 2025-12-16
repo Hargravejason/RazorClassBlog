@@ -1,11 +1,16 @@
-﻿@using Microsoft.Extensions.Options
+﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Options
 @model RazorClassBlog.Models.BlogPost;
 @inject IOptions<BlogOptions> Options;
+@inject IHttpContextAccessor HttpContextAccessor
+
 @* 
   Custom JSON-LD for BlogPosting schema as needed
 *@
 @{
   string heroImageUrl = Model.HeroImageUrl ?? "https://cdn.AcmeAces.com/images/HomePage.jpg";
+  var request = HttpContextAccessor.HttpContext?.Request;
+  var blogUrl = Url.Page("Index", null, new { area = "Blog" }, protocol: request?.Scheme);
 }
 <script type="application/ld+json">
   {
@@ -30,6 +35,11 @@
     "image": [
       "@heroImageUrl"
     ],
+    "isPartOf": {
+      "@@type": "Blog",
+      "name": "@Options.Value.PublicDisplayName",
+      "url": "@blogUrl"
+    },
     "mainEntityOfPage": {
       "@@type": "WebPage",
       "@@id": "@ViewData["canonical"]"
