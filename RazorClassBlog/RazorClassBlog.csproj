@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>0.0.6</VersionPrefix>
-		<PackageReleaseNotes>Updated app to support custom routing area. So if a user wants to have something other than 'Blog', they can specify it in the options. Such as 'Article'. This is only for the public facing side.</PackageReleaseNotes>
+		<VersionPrefix>0.0.7</VersionPrefix>
+		<PackageReleaseNotes>Updated app to support a function to export blog posts for SEO processing.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		

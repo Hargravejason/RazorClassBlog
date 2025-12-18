@@ -12,13 +12,11 @@ namespace RazorClassBlog.Areas.BlogAdmin;
 public class EditModel : PageModel
 {
   private readonly IBlogService _blogService;
-  private readonly IBlogRepository _blogRepository;
   private readonly BlogOptions _options;
 
-  public EditModel(IBlogService blogService, IBlogRepository blogRepository, IOptions<BlogOptions> options)
+  public EditModel(IBlogService blogService, IOptions<BlogOptions> options)
   {
     _blogService = blogService;
-    _blogRepository = blogRepository;
     _options = options.Value;
   }
 
@@ -35,7 +33,7 @@ public class EditModel : PageModel
   {
     if (!string.IsNullOrEmpty(id))
     {
-      var existing = await _blogRepository.GetByIdAsync(_options.BlogKey, id, ct);
+      var existing = await _blogService.GetPostByIdAsync(_options.BlogKey, id, ct);
       if (existing == null)
         return NotFound();
 

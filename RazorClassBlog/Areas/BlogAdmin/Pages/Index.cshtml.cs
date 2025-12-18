@@ -21,8 +21,8 @@ public class IndexModel : PageModel
     _options = options.Value;
   }
 
-  public PagedResult<BlogPost> Posts { get; private set; } =
-      new() { Items = Array.Empty<BlogPost>(), Page = 1, PageSize = 20, TotalCount = 0 };
+  public PagedResult<BlogPostMini> Posts { get; private set; } =
+      new() { Items = Array.Empty<BlogPostMini>(), Page = 1, PageSize = 20, TotalCount = 0 };
 
   [FromQuery]
   public int PageNumber { get; set; } = 1;
@@ -52,7 +52,7 @@ public class IndexModel : PageModel
 
     if (Status.HasValue)
     {
-      result = new PagedResult<BlogPost>
+      result = new PagedResult<BlogPostMini>
       {
         Items = result.Items.Where(p => p.Status == Status.Value).ToList(),
         Page = result.Page,

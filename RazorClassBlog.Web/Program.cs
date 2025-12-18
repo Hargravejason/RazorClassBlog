@@ -3,7 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using RazorClassBlog;
 using RazorClassBlog.EntityFramework;
 using RazorClassBlog.Interfaces;
+using RazorClassBlog.Services;
 using RazorClassBlog.Web.Data;
+using System.Text;
+using System.Xml;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,5 +75,39 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapGet("/sitemap.xml", async (HttpContext http, IBlogService blogService, CancellationToken ct) =>
+{
+  http.Response.ContentType = "application/xml; charset=utf-8";
+
+  var baseUrl = $"{http.Request.Scheme}://{http.Request.Host}";
+
+  var settings = new XmlWriterSettings
+  {
+    Async = true,
+    Indent = true,
+    Encoding = Encoding.UTF8
+  };
+
+  await using var writer = XmlWriter.Create(http.Response.Body, settings);
+
+  await writer.WriteStartDocumentAsync();
+  await writer.WriteStartElementAsync(null, "urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
+
+  await foreach (var item in blogService.GetPublicSitemapItemsAsync(ct))
+  {
+    await writer.WriteStartElementAsync(null, "url", null);
+
+    await writer.WriteElementStringAsync(null, "loc", null, baseUrl + item.RelativeUrl);
+    await writer.WriteElementStringAsync(null, "lastmod", null, item.LastModifiedUtc.UtcDateTime.ToString("yyyy-MM-dd"));
+
+    await writer.WriteEndElementAsync(); // </url>
+  }
+
+  await writer.WriteEndElementAsync(); // </urlset>
+  await writer.WriteEndDocumentAsync();
+
+  await writer.FlushAsync();
+});
 
 app.Run();

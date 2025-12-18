@@ -18,8 +18,8 @@ public class IndexModel : PageModel
     _options = options.Value;
   }
 
-  public PagedResult<BlogPost> Posts { get; private set; } =
-      new() { Items = Array.Empty<BlogPost>(), Page = 1, PageSize = 10, TotalCount = 0 };
+  public PagedResult<BlogPostMini> Posts { get; private set; } =
+      new() { Items = Array.Empty<BlogPostMini>(), Page = 1, PageSize = 10, TotalCount = 0 };
 
   [FromQuery]
   public int PageNumber { get; set; } = 1;

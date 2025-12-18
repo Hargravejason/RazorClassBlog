@@ -33,7 +33,7 @@ public class BlogRepository : IBlogRepository
     return await query.FirstOrDefaultAsync(ct);
   }
 
-  public async Task<PagedResult<BlogPost>> QueryAsync(BlogQuery query, CancellationToken ct = default)
+  public async Task<PagedResult<BlogPostMini>> QueryAsync(BlogQuery query, CancellationToken ct = default)
   {
     query.EnsureValid();
 
@@ -76,7 +76,7 @@ public class BlogRepository : IBlogRepository
         .Take(query.PageSize)
         .ToListAsync(ct);
 
-    return new PagedResult<BlogPost>
+    return new PagedResult<BlogPostMini>
     {
       Items = items,
       Page = query.Page,
@@ -127,5 +127,30 @@ public class BlogRepository : IBlogRepository
       }
       await _db.SaveChangesAsync(ct);
     }
+  }
+
+
+  public async Task<IReadOnlyList<BlogPost>> GetPublishedAfterAsync(string blogKey, DateTimeOffset utcNow, DateTimeOffset? lastPublishedUtc, string? lastId, int take, CancellationToken ct)
+  {
+    if (take <= 0) take = 250;
+
+    IQueryable<BlogPost> q =
+        _db.BlogPosts.AsNoTracking()
+           .Where(p =>
+               p.BlogKey == blogKey &&
+               p.Status == BlogPostStatus.Published &&
+               p.PublishedUtc != null &&
+               p.PublishedUtc <= utcNow);
+
+    if (lastPublishedUtc.HasValue)
+    {
+      var lp = lastPublishedUtc.Value;
+      q = q.Where(p => p.PublishedUtc!.Value > lp);
+    }
+
+    q = q.OrderBy(p => p.PublishedUtc)
+         .Take(take);
+
+    return await q.ToListAsync(ct);
   }
 }
