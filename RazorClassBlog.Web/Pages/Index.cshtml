@@ -4,7 +4,15 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
+<div class="text-center mb-4">
     <h1 class="display-4">Welcome</h1>
     <p>This is the test site for the Blog Razor Class Library (RCL)</p>
 </div>
+
+<section class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Latest posts</h2>
+    </div>
+
+    @await Component.InvokeAsync("RecentBlogPosts", new { count = 2, layout = "horizontal" })
+</section>

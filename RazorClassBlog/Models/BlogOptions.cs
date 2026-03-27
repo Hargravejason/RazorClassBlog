@@ -62,6 +62,16 @@ public class BlogOptions
   /// </summary>
   public string PublicRoutePrefix { get; set; } = "/blog";
 
+  /// <summary>
+  /// Default number of items shown by the recent posts widget.
+  /// </summary>
+  public int RecentPostsCount { get; set; } = 5;
+
+  /// <summary>
+  /// Default layout for the recent posts widget. Supported values: "vertical", "horizontal".
+  /// </summary>
+  public string RecentPostsLayout { get; set; } = "vertical";
+
   /// <summary>What the site calls the blog in UI (nav, headings, breadcrumbs).</summary>
   public string PublicDisplayName { get; set; } = "Blog";
 
