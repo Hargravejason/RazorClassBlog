@@ -75,4 +75,22 @@ public class BlogOptions
   /// <summary>What the site calls the blog in UI (nav, headings, breadcrumbs).</summary>
   public string PublicDisplayName { get; set; } = "Blog";
 
+  /// <summary>
+  /// Azure Blob Storage connection string for image uploads.
+  /// When null or empty, image upload functionality is disabled.
+  /// </summary>
+  public string? BlobStorageConnectionString { get; set; }
+
+  /// <summary>
+  /// CDN base URL used to build public image URLs (e.g. "https://cdn.example.com").
+  /// When null, the blob storage URL is used directly.
+  /// </summary>
+  public string? BlobStorageCdnBaseUrl { get; set; }
+
+  /// <summary>
+  /// Container name and optional folder prefix for uploaded images
+  /// (e.g. "media" or "media/blog-images"). No leading or trailing slashes.
+  /// </summary>
+  public string BlobStorageContainerPath { get; set; } = "media";
+
 }

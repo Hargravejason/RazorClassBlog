@@ -103,6 +103,55 @@
 				</div>
 			</div>
 
+			@if (Model.ImageUploadEnabled)
+			{
+				<div class="border rounded-3 p-3 mb-3 bg-light">
+					<h2 class="h6 mb-3">Images</h2>
+
+					@if (string.IsNullOrEmpty(Model.Post.Id))
+					{
+						<p class="text-muted small">Save the post first before uploading images.</p>
+					}
+					else
+					{
+						<form method="post" enctype="multipart/form-data" asp-page-handler="UploadImage">
+							<input type="hidden" asp-for="Post.Id" />
+							<input type="hidden" asp-for="Post.BlogKey" />
+							<div class="mb-2">
+								<input type="file" asp-for="UploadImage" class="form-control form-control-sm"
+									   accept="image/*" />
+							</div>
+							<button type="submit" class="btn btn-sm btn-outline-primary">
+								<i class="bi bi-cloud-upload"></i> Upload Image
+							</button>
+						</form>
+
+						@if (Model.UploadedImages.Count > 0)
+						{
+							<hr class="my-3" />
+							<p class="small fw-semibold mb-2">Uploaded images</p>
+							<ul class="list-unstyled mb-0">
+								@foreach (var url in Model.UploadedImages)
+								{
+									<li class="mb-2">
+										<img src="@url" alt="Uploaded image" class="img-thumbnail mb-1"
+											 style="max-height:80px; max-width:100%;" />
+										<div class="input-group input-group-sm">
+											<input type="text" class="form-control form-control-sm js-copy-url"
+												   value="@url" readonly />
+											<button class="btn btn-outline-secondary btn-sm js-copy-btn" type="button"
+													title="Copy URL">
+												<i class="bi bi-clipboard"></i>
+											</button>
+										</div>
+									</li>
+								}
+							</ul>
+						}
+					}
+				</div>
+			}
+
 			<div class="d-flex justify-content-between">
 				<a asp-page="Index" class="btn btn-outline-secondary">
 					Back to list
@@ -285,6 +334,27 @@
 					if (autosaveTimer) {
 							clearInterval(autosaveTimer);
 					}
+			});
+		});
+	</script>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			document.querySelectorAll(".js-copy-btn").forEach(function (btn) {
+				btn.addEventListener("click", function () {
+					const input = btn.closest(".input-group").querySelector(".js-copy-url");
+					if (!input) return;
+					navigator.clipboard.writeText(input.value).then(function () {
+						const icon = btn.querySelector("i");
+						if (icon) {
+							icon.classList.replace("bi-clipboard", "bi-check2");
+							setTimeout(function () { icon.classList.replace("bi-check2", "bi-clipboard"); }, 1500);
+						}
+					}).catch(function () {
+						// Clipboard API unavailable – select the text so the user can copy manually
+						input.select();
+					});
+				});
 			});
 		});
 	</script>
