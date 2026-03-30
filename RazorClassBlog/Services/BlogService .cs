@@ -85,6 +85,36 @@ public class BlogService : IBlogService
     return _repository.DeleteAsync(blogKey, id, userId, ct);
   }
 
+  public async Task<IReadOnlyList<BlogPostMini>> GetRelatedPostsAsync(string blogKey, IEnumerable<string> ids, CancellationToken ct = default)
+  {
+    if (string.IsNullOrWhiteSpace(blogKey))
+      blogKey = _options.BlogKey;
+
+    var idList = ids.ToList();
+    if (idList.Count == 0) return Array.Empty<BlogPostMini>();
+
+    var now = DateTimeOffset.UtcNow;
+    var posts = await _repository.GetByIdsAsync(blogKey, idList, ct);
+
+    // Filter to only published posts that are visible to the public
+    return posts
+        .Where(p => p.Status == BlogPostStatus.Published &&
+                    p.PublishedUtc.HasValue &&
+                    p.PublishedUtc.Value <= now &&
+                    p.DeletedUtc == null)
+        .OrderBy(p => idList.IndexOf(p.Id))
+        .ToList<BlogPostMini>();
+  }
+
+  public async Task<IReadOnlyList<BlogPostMini>> GetAllPublishedPostsAsync(string blogKey, CancellationToken ct = default)
+  {
+    if (string.IsNullOrWhiteSpace(blogKey))
+      blogKey = _options.BlogKey;
+
+    var posts = await _repository.GetAllPublishedAsync(blogKey, ct);
+    return posts.ToList<BlogPostMini>();
+  }
+
   public async IAsyncEnumerable<PublicSitemapItem> GetPublicSitemapItemsAsync([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default)
   {
     var now = DateTimeOffset.UtcNow;

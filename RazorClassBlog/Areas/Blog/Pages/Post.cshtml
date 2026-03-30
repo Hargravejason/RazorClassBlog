@@ -81,6 +81,56 @@ else
         &laquo; Back to @Options.Value.PublicDisplayName home
       </a>
     </footer>
+
+    @if (Model.RelatedPosts.Count > 0)
+    {
+      <section class="mt-5 pt-4 border-top" aria-label="Related articles">
+        <h2 class="h4 mb-4">You May Also Like</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          @foreach (var related in Model.RelatedPosts)
+          {
+            var relatedPublished = related.PublishedUtc ?? related.CreatedUtc;
+            <article class="col">
+              <div class="card h-100 shadow-sm border-0">
+                @if (!string.IsNullOrWhiteSpace(related.HeroImageUrl))
+                {
+                  <div class="ratio ratio-16x9 mb-2 rounded-3 overflow-hidden">
+                    <img src="@related.HeroImageUrl"
+                         class="w-100 h-100"
+                         style="object-fit:cover;"
+                         alt="@related.Title"
+                         loading="lazy"
+                         decoding="async" />
+                  </div>
+                }
+                <div class="card-body">
+                  <h3 class="h5 card-title mb-1">
+                    <a asp-page="Post" asp-area="Blog"
+                       asp-route-year="@relatedPublished.Year"
+                       asp-route-month="@relatedPublished.Month"
+                       asp-route-slug="@related.Slug"
+                       class="stretched-link text-decoration-none">
+                      @related.Title
+                    </a>
+                  </h3>
+                  <p class="card-subtitle mb-2 text-muted small">
+                    @relatedPublished.ToString("MMMM dd, yyyy")
+                    @if (!string.IsNullOrWhiteSpace(related.AuthorName))
+                    {
+                      <span> &middot; @related.AuthorName</span>
+                    }
+                  </p>
+                  @if (!string.IsNullOrWhiteSpace(related.Summary))
+                  {
+                    <p class="card-text">@related.Summary</p>
+                  }
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
   </article>
 
   @section Metas {

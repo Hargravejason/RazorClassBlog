@@ -49,6 +49,12 @@ public class EditModel : PageModel
   [BindProperty]
   public string TagsCsv { get; set; } = string.Empty;
 
+  /// <summary>
+  /// Published posts available for selection as related articles, excluding the current post.
+  /// Populated on GET only (not bound on POST).
+  /// </summary>
+  public IReadOnlyList<BlogPostMini> AvailablePostsForRelated { get; private set; } = Array.Empty<BlogPostMini>();
+
   public async Task<IActionResult> OnGetAsync(string? id, CancellationToken ct)
   {
     if (!string.IsNullOrEmpty(id))
@@ -84,6 +90,9 @@ public class EditModel : PageModel
         Post.AuthorName = User.Identity!.Name;
     }
 
+    // Load published posts for the related articles selection UI (exclude current post)
+    await LoadAvailablePostsForRelatedAsync(ct);
+
     return Page();
   }
 
@@ -99,6 +108,8 @@ public class EditModel : PageModel
         : TagsCsv
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
+
+    Post.RelatedPostIds ??= new List<string>();
 
     // Ensure CreatedUtc is set for new posts before we validate
     if (string.IsNullOrEmpty(Post.Id))
@@ -135,6 +146,8 @@ public class EditModel : PageModel
         : TagsCsv
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
+
+    Post.RelatedPostIds ??= new List<string>();
 
     // For new posts, make sure CreatedUtc is set
     if (string.IsNullOrEmpty(Post.Id) && Post.CreatedUtc == default)
@@ -186,6 +199,9 @@ public class EditModel : PageModel
         Publish = Post.Status == BlogPostStatus.Published;
         TagsCsv = Post.Tags is { Count: > 0 } ? string.Join(", ", Post.Tags) : string.Empty;
       }
+
+      await LoadAvailablePostsForRelatedAsync(ct);
+
       return Page();
     }
 
@@ -208,6 +224,12 @@ public class EditModel : PageModel
       await _blobStorage.DeleteImageAsync(blobUrl, ct);
 
     return RedirectToPage("Edit", new { id = Post.Id });
+  }
+
+  private async Task LoadAvailablePostsForRelatedAsync(CancellationToken ct)
+  {
+    var allPublished = await _blogService.GetAllPublishedPostsAsync(_options.BlogKey, ct);
+    AvailablePostsForRelated = allPublished.Where(p => p.Id != Post.Id).ToList();
   }
 
 }

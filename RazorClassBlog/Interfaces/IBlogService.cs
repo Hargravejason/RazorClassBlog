@@ -14,4 +14,8 @@ public interface IBlogService
   Task DeletePostAsync(string blogKey, string id, string userId, CancellationToken ct = default);
 
   IAsyncEnumerable<PublicSitemapItem> GetPublicSitemapItemsAsync(CancellationToken ct = default);
+
+  Task<IReadOnlyList<BlogPostMini>> GetRelatedPostsAsync(string blogKey, IEnumerable<string> ids, CancellationToken ct = default);
+
+  Task<IReadOnlyList<BlogPostMini>> GetAllPublishedPostsAsync(string blogKey, CancellationToken ct = default);
 }

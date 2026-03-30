@@ -16,4 +16,8 @@ public interface IBlogRepository
   Task DeleteAsync(string blogKey, string id, string user, CancellationToken ct = default);
 
   Task<IReadOnlyList<BlogPost>> GetPublishedAfterAsync(string blogKey, DateTimeOffset utcNow, DateTimeOffset? lastPublishedUtc, string? lastId, int take, CancellationToken ct);
+
+  Task<IReadOnlyList<BlogPost>> GetByIdsAsync(string blogKey, IEnumerable<string> ids, CancellationToken ct = default);
+
+  Task<IReadOnlyList<BlogPost>> GetAllPublishedAsync(string blogKey, CancellationToken ct = default);
 }

@@ -101,6 +101,31 @@
 					<label asp-for="Post.HeroImageUrl" class="form-label">Hero image URL</label>
 					<input asp-for="Post.HeroImageUrl" class="form-control" />
 				</div>
+
+				@if (Model.AvailablePostsForRelated.Count > 0)
+				{
+					<div class="mb-3">
+						<label class="form-label">Related Articles</label>
+						<div class="border rounded p-2" style="max-height:200px; overflow-y:auto;">
+							@foreach (var available in Model.AvailablePostsForRelated)
+							{
+								var isChecked = Model.Post.RelatedPostIds?.Contains(available.Id) == true;
+								<div class="form-check">
+									<input class="form-check-input"
+										   type="checkbox"
+										   name="Post.RelatedPostIds"
+										   value="@available.Id"
+										   id="related_@available.Id"
+										   @(isChecked ? "checked" : "") />
+									<label class="form-check-label small" for="related_@available.Id">
+										@available.Title
+									</label>
+								</div>
+							}
+						</div>
+						<span class="form-text">Select posts to display as related articles at the bottom of this post.</span>
+					</div>
+				}
 			</div>
 
 			@if (Model.ImageUploadEnabled)

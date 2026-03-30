@@ -107,6 +107,7 @@ public class BlogRepository : IBlogRepository
     existing.Summary = post.Summary;
     existing.HeroImageUrl = post.HeroImageUrl;
     existing.Tags = post.Tags;
+    existing.RelatedPostIds = post.RelatedPostIds;
 
     await _db.SaveChangesAsync(ct);
     return post;
@@ -152,5 +153,28 @@ public class BlogRepository : IBlogRepository
          .Take(take);
 
     return await q.ToListAsync(ct);
+  }
+
+  public async Task<IReadOnlyList<BlogPost>> GetByIdsAsync(string blogKey, IEnumerable<string> ids, CancellationToken ct = default)
+  {
+    var idList = ids.ToList();
+    if (idList.Count == 0) return Array.Empty<BlogPost>();
+
+    return await _db.BlogPosts.AsNoTracking()
+        .Where(p => p.BlogKey == blogKey && idList.Contains(p.Id))
+        .ToListAsync(ct);
+  }
+
+  public async Task<IReadOnlyList<BlogPost>> GetAllPublishedAsync(string blogKey, CancellationToken ct = default)
+  {
+    var now = DateTimeOffset.UtcNow;
+    return await _db.BlogPosts.AsNoTracking()
+        .Where(p => p.BlogKey == blogKey &&
+                    p.Status == BlogPostStatus.Published &&
+                    p.PublishedUtc != null &&
+                    p.PublishedUtc <= now &&
+                    p.DeletedUtc == null)
+        .OrderByDescending(p => p.PublishedUtc)
+        .ToListAsync(ct);
   }
 }
