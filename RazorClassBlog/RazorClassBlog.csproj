@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>1.0.0</VersionPrefix>
-		<PackageReleaseNotes>Updated to .NET 10, and added in a component for showing recent blog posts.</PackageReleaseNotes>
+		<VersionPrefix>1.0.1</VersionPrefix>
+		<PackageReleaseNotes>Updated to allow uploads of images to blob storage.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
