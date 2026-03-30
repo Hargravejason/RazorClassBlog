@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -12,13 +13,32 @@ namespace RazorClassBlog.Areas.BlogAdmin;
 public class EditModel : PageModel
 {
   private readonly IBlogService _blogService;
+  private readonly IBlobStorageService _blobStorage;
   private readonly BlogOptions _options;
 
-  public EditModel(IBlogService blogService, IOptions<BlogOptions> options)
+  public EditModel(IBlogService blogService, IBlobStorageService blobStorage, IOptions<BlogOptions> options)
   {
     _blogService = blogService;
+    _blobStorage = blobStorage;
     _options = options.Value;
   }
+
+  /// <summary>
+  /// Set to true when blob storage is configured so the view can show the upload UI.
+  /// </summary>
+  public bool ImageUploadEnabled => _blobStorage.IsConfigured;
+
+  /// <summary>
+  /// Images previously uploaded for the current post.
+  /// Populated on GET (when editing an existing post) and after a successful upload.
+  /// </summary>
+  public IReadOnlyList<string> UploadedImages { get; private set; } = Array.Empty<string>();
+
+  /// <summary>
+  /// File selected by the user for upload. Not bound on GET.
+  /// </summary>
+  [BindProperty]
+  public IFormFile? UploadImage { get; set; }
 
   [BindProperty]
   public BlogPost Post { get; set; } = new();
@@ -42,6 +62,9 @@ public class EditModel : PageModel
       TagsCsv = Post.Tags is { Count: > 0 }
           ? string.Join(", ", Post.Tags)
           : string.Empty;
+
+      if (_blobStorage.IsConfigured)
+        UploadedImages = await _blobStorage.ListImagesAsync(id, ct);
     }
     else
     {
@@ -132,6 +155,59 @@ public class EditModel : PageModel
     };
 
     return new JsonResult(payload);
+  }
+
+  /// <summary>
+  /// Handles image file upload. Requires that the post already exists (has an Id).
+  /// After upload, reloads the post and image list then re-renders the Edit page.
+  /// </summary>
+  public async Task<IActionResult> OnPostUploadImageAsync(CancellationToken ct)
+  {
+    if (!_blobStorage.IsConfigured)
+      return BadRequest("Image upload is not configured.");
+
+    if (string.IsNullOrEmpty(Post.Id))
+    {
+      ModelState.AddModelError(string.Empty, "Save the post before uploading images.");
+      return Page();
+    }
+
+    if (UploadImage is null || UploadImage.Length == 0)
+    {
+      ModelState.AddModelError(string.Empty, "Please select a file to upload.");
+      // Reload images so the list stays visible
+      UploadedImages = await _blobStorage.ListImagesAsync(Post.Id, ct);
+
+      // Reload post to keep form state
+      var existing = await _blogService.GetPostByIdAsync(_options.BlogKey, Post.Id, ct);
+      if (existing != null)
+      {
+        Post = existing;
+        Publish = Post.Status == BlogPostStatus.Published;
+        TagsCsv = Post.Tags is { Count: > 0 } ? string.Join(", ", Post.Tags) : string.Empty;
+      }
+      return Page();
+    }
+
+    using var stream = UploadImage.OpenReadStream();
+    await _blobStorage.UploadAsync(Post.Id, UploadImage.FileName, UploadImage.ContentType, stream, ct);
+
+    // Redirect to GET so the full image list is refreshed cleanly (PRG pattern)
+    return RedirectToPage("Edit", new { id = Post.Id });
+  }
+
+  /// <summary>
+  /// Deletes a single uploaded image by its blob URL. Redirects back to the Edit page (PRG).
+  /// </summary>
+  public async Task<IActionResult> OnPostDeleteImageAsync([FromForm] string blobUrl, CancellationToken ct)
+  {
+    if (!_blobStorage.IsConfigured)
+      return BadRequest("Image upload is not configured.");
+
+    if (!string.IsNullOrWhiteSpace(blobUrl))
+      await _blobStorage.DeleteImageAsync(blobUrl, ct);
+
+    return RedirectToPage("Edit", new { id = Post.Id });
   }
 
 }

@@ -38,6 +38,9 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
   //options.EnableAdminUi = false;                      // option to completely disable the admin UI - useful if you have a separate admin app
   //options.AdminRoles = new[] { "User", "BlogAdmin" }; // permssions to manage blog
   //options.ReaderRoles = new[] { "User", "Customer" }; // permission to be considered a "reader" (e.g. can comment)
+  options.BlobStorageConnectionString = builder.Configuration["Blogging:BlobStorageConnectionString"]; // when set, enables image upload functionality in the blog admin (and requires Azure Blob Storage account)
+  options.BlobStorageCdnBaseUrl = builder.Configuration["Blogging:BlobStorageCdnBaseUrl"]; // optional CDN base URL to build public image URLs (e.g. "https://cdn.example.com"). If not set, falls back to blob storage URL which may or may not be publicly accessible depending on your blob storage configuration.
+  options.BlobStorageContainerPath = builder.Configuration["Blogging:BlobStorageContainerPath"] ?? "blog-images"; // optional container/folder path for blog images in blob storage (default: "blog-images"). Can be used to organize images within a container or specify a subfolder if using a flat blob storage structure.
 });
 
 var app = builder.Build();

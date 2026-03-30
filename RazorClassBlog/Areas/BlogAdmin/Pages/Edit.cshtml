@@ -103,6 +103,55 @@
 				</div>
 			</div>
 
+			@if (Model.ImageUploadEnabled)
+			{
+				<div class="border rounded-3 p-3 mb-3 bg-light">
+					<h2 class="h6 mb-3">Images</h2>
+
+					@if (string.IsNullOrEmpty(Model.Post.Id))
+					{
+						<p class="text-muted small">Save the post first before uploading images.</p>
+					}
+					else
+					{
+						<div class="mb-2">
+							<input type="file" name="UploadImage" class="form-control form-control-sm"
+								   accept="image/*" form="uploadForm" />
+						</div>
+						<button type="submit" class="btn btn-sm btn-outline-primary" form="uploadForm">
+							<i class="fa-solid fa-cloud-arrow-up"></i> Upload Image
+						</button>
+
+						@if (Model.UploadedImages.Count > 0)
+						{
+							<hr class="my-3" />
+							<p class="small fw-semibold mb-2">Uploaded images</p>
+							<ul class="list-unstyled mb-0">
+								@foreach (var url in Model.UploadedImages)
+								{
+									<li class="mb-2">
+										<img src="@url" alt="Uploaded image" class="img-thumbnail mb-1"
+											 style="max-height:80px; max-width:100%;" />
+										<div class="input-group input-group-sm">
+											<input type="text" class="form-control form-control-sm js-copy-url"
+												   value="@url" readonly />
+											<button class="btn btn-outline-secondary btn-sm js-copy-btn" type="button"
+													title="Copy URL">
+												<i class="fa-solid fa-clipboard"></i>
+											</button>
+											<button class="btn btn-outline-danger btn-sm js-delete-image-btn" type="button"
+													data-url="@url" title="Delete image">
+												<i class="fa-solid fa-trash"></i>
+											</button>
+										</div>
+									</li>
+								}
+							</ul>
+						}
+					}
+				</div>
+			}
+
 			<div class="d-flex justify-content-between">
 				<a asp-page="Index" class="btn btn-outline-secondary">
 					Back to list
@@ -114,6 +163,23 @@
 		</div>
 	</div>
 </form>
+
+@* Separate upload form placed outside the main post form (nested forms are invalid HTML).
+   The file input and submit button above reference this form via the `form="uploadForm"` attribute. *@
+@if (Model.ImageUploadEnabled && !string.IsNullOrEmpty(Model.Post.Id))
+{
+	<form id="uploadForm" method="post" enctype="multipart/form-data" asp-page-handler="UploadImage">
+		<input type="hidden" asp-for="Post.Id" />
+		<input type="hidden" asp-for="Post.BlogKey" />
+	</form>
+
+	@* Hidden form used by the JS delete handler to POST blobUrl + Post.Id to OnPostDeleteImageAsync *@
+	<form id="deleteImageForm" method="post" asp-page-handler="DeleteImage">
+		<input type="hidden" asp-for="Post.Id" />
+		<input type="hidden" asp-for="Post.BlogKey" />
+		<input type="hidden" id="deleteImageBlobUrl" name="blobUrl" value="" />
+	</form>
+}
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
@@ -285,6 +351,42 @@
 					if (autosaveTimer) {
 							clearInterval(autosaveTimer);
 					}
+			});
+		});
+	</script>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			// Copy URL to clipboard
+			document.querySelectorAll(".js-copy-btn").forEach(function (btn) {
+				btn.addEventListener("click", function () {
+					const input = btn.closest(".input-group").querySelector(".js-copy-url");
+					if (!input) return;
+					navigator.clipboard.writeText(input.value).then(function () {
+						const icon = btn.querySelector("i");
+						if (icon) {
+							icon.classList.replace("fa-clipboard", "fa-check");
+							setTimeout(function () { icon.classList.replace("fa-check", "fa-clipboard"); }, 1500);
+						}
+					}).catch(function () {
+						input.select();
+					});
+				});
+			});
+
+			// Delete individual image
+			document.querySelectorAll(".js-delete-image-btn").forEach(function (btn) {
+				btn.addEventListener("click", function () {
+					const url = btn.getAttribute("data-url");
+					if (!url) return;
+					if (!confirm("Delete this image? This cannot be undone.")) return;
+					const urlInput = document.getElementById("deleteImageBlobUrl");
+					const form = document.getElementById("deleteImageForm");
+					if (urlInput && form) {
+						urlInput.value = url;
+						form.submit();
+					}
+				});
 			});
 		});
 	</script>
