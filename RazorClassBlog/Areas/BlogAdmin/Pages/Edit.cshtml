@@ -114,17 +114,13 @@
 					}
 					else
 					{
-						<form method="post" enctype="multipart/form-data" asp-page-handler="UploadImage">
-							<input type="hidden" asp-for="Post.Id" />
-							<input type="hidden" asp-for="Post.BlogKey" />
-							<div class="mb-2">
-								<input type="file" asp-for="UploadImage" class="form-control form-control-sm"
-									   accept="image/*" />
-							</div>
-							<button type="submit" class="btn btn-sm btn-outline-primary">
-								<i class="bi bi-cloud-upload"></i> Upload Image
-							</button>
-						</form>
+						<div class="mb-2">
+							<input type="file" name="UploadImage" class="form-control form-control-sm"
+								   accept="image/*" form="uploadForm" />
+						</div>
+						<button type="submit" class="btn btn-sm btn-outline-primary" form="uploadForm">
+							<i class="bi bi-cloud-upload"></i> Upload Image
+						</button>
 
 						@if (Model.UploadedImages.Count > 0)
 						{
@@ -163,6 +159,16 @@
 		</div>
 	</div>
 </form>
+
+@* Separate upload form placed outside the main post form (nested forms are invalid HTML).
+   The file input and submit button above reference this form via the `form="uploadForm"` attribute. *@
+@if (Model.ImageUploadEnabled && !string.IsNullOrEmpty(Model.Post.Id))
+{
+	<form id="uploadForm" method="post" enctype="multipart/form-data" asp-page-handler="UploadImage">
+		<input type="hidden" asp-for="Post.Id" />
+		<input type="hidden" asp-for="Post.BlogKey" />
+	</form>
+}
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
