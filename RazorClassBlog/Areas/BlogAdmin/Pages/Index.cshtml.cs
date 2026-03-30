@@ -13,11 +13,13 @@ namespace RazorClassBlog.Areas.BlogAdmin;
 public class IndexModel : PageModel
 {
   private readonly IBlogRepository _blogRepository;
+  private readonly IBlobStorageService _blobStorage;
   private readonly BlogOptions _options;
 
-  public IndexModel(IBlogRepository blogRepository, IOptions<BlogOptions> options)
+  public IndexModel(IBlogRepository blogRepository, IBlobStorageService blobStorage, IOptions<BlogOptions> options)
   {
     _blogRepository = blogRepository;
+    _blobStorage = blobStorage;
     _options = options.Value;
   }
 
@@ -68,6 +70,10 @@ public class IndexModel : PageModel
   {
     if (!string.IsNullOrEmpty(id))
     {
+      // Delete any uploaded images for this post before removing the post record
+      if (_blobStorage.IsConfigured)
+        await _blobStorage.DeleteAllImagesAsync(id, ct);
+
       string userId = User.Identity!.Name!;
       await _blogRepository.DeleteAsync(_options.BlogKey, id, userId, ct);
     }

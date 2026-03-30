@@ -65,6 +65,39 @@ public class BlobStorageService : IBlobStorageService
     return results;
   }
 
+  /// <inheritdoc/>
+  public async Task DeleteImageAsync(string blobUrl, CancellationToken ct = default)
+  {
+    if (string.IsNullOrWhiteSpace(blobUrl))
+      return;
+
+    var blobName = ExtractBlobName(blobUrl);
+    if (blobName == null)
+      return;
+
+    var (containerClient, _) = GetContainerAndFolder();
+    var blobClient = containerClient.GetBlobClient(blobName);
+    await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
+  }
+
+  /// <inheritdoc/>
+  public async Task DeleteAllImagesAsync(string postId, CancellationToken ct = default)
+  {
+    if (string.IsNullOrWhiteSpace(postId))
+      return;
+
+    var (containerClient, folderPrefix) = GetContainerAndFolder();
+
+    var prefix = string.IsNullOrEmpty(folderPrefix)
+        ? $"{postId}/"
+        : $"{folderPrefix}/{postId}/";
+
+    await foreach (var item in containerClient.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
+    {
+      await containerClient.GetBlobClient(item.Name).DeleteIfExistsAsync(cancellationToken: ct);
+    }
+  }
+
   // ── helpers ─────────────────────────────────────────────────────────────
 
   private (BlobContainerClient container, string folderPrefix) GetContainerAndFolder()
@@ -111,5 +144,25 @@ public class BlobStorageService : IBlobStorageService
       return blobUri;
 
     return $"{cdnBase}/{blobName}";
+  }
+
+  /// <summary>
+  /// Reverses <see cref="BuildUrl"/> — extracts the blob name from a public URL.
+  /// Works for both CDN URLs and direct storage URLs.
+  /// </summary>
+  private string? ExtractBlobName(string url)
+  {
+    // Try CDN URL first: {cdnBase}/{blobName}
+    var cdnBase = _options.BlobStorageCdnBaseUrl?.TrimEnd('/');
+    if (!string.IsNullOrEmpty(cdnBase) && url.StartsWith(cdnBase + "/", StringComparison.OrdinalIgnoreCase))
+      return url[(cdnBase.Length + 1)..];
+
+    // Try direct Azure storage URL: {containerUri}/{blobName}
+    var (containerClient, _) = GetContainerAndFolder();
+    var containerUri = containerClient.Uri.ToString().TrimEnd('/') + "/";
+    if (url.StartsWith(containerUri, StringComparison.OrdinalIgnoreCase))
+      return url[containerUri.Length..];
+
+    return null;
   }
 }

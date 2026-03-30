@@ -196,4 +196,18 @@ public class EditModel : PageModel
     return RedirectToPage("Edit", new { id = Post.Id });
   }
 
+  /// <summary>
+  /// Deletes a single uploaded image by its blob URL. Redirects back to the Edit page (PRG).
+  /// </summary>
+  public async Task<IActionResult> OnPostDeleteImageAsync([FromForm] string blobUrl, CancellationToken ct)
+  {
+    if (!_blobStorage.IsConfigured)
+      return BadRequest("Image upload is not configured.");
+
+    if (!string.IsNullOrWhiteSpace(blobUrl))
+      await _blobStorage.DeleteImageAsync(blobUrl, ct);
+
+    return RedirectToPage("Edit", new { id = Post.Id });
+  }
+
 }

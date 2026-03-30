@@ -27,4 +27,19 @@ public interface IBlobStorageService
   /// <param name="postId">Blog post ID whose images should be listed.</param>
   /// <param name="ct">Cancellation token.</param>
   Task<IReadOnlyList<string>> ListImagesAsync(string postId, CancellationToken ct = default);
+
+  /// <summary>
+  /// Deletes a single blob identified by its public URL (CDN or storage URL).
+  /// </summary>
+  /// <param name="blobUrl">The URL previously returned by <see cref="UploadAsync"/> or <see cref="ListImagesAsync"/>.</param>
+  /// <param name="ct">Cancellation token.</param>
+  Task DeleteImageAsync(string blobUrl, CancellationToken ct = default);
+
+  /// <summary>
+  /// Deletes all blobs stored under the given blog post sub-folder.
+  /// Called when the blog post itself is deleted.
+  /// </summary>
+  /// <param name="postId">Blog post ID whose images should be removed.</param>
+  /// <param name="ct">Cancellation token.</param>
+  Task DeleteAllImagesAsync(string postId, CancellationToken ct = default);
 }
