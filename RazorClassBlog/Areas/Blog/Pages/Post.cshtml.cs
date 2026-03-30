@@ -19,6 +19,8 @@ public class PostModel : PageModel
 
   public BlogPost? Post { get; private set; }
 
+  public IReadOnlyList<BlogPostMini> RelatedPosts { get; private set; } = Array.Empty<BlogPostMini>();
+
   public async Task<IActionResult> OnGetAsync(int year, int month, string slug, CancellationToken ct)
   {
     var blogKey = _options.BlogKey;
@@ -43,6 +45,12 @@ public class PostModel : PageModel
     }
 
     Post = post;
+
+    if (post.RelatedPostIds is { Count: > 0 })
+    {
+      RelatedPosts = await _blogService.GetRelatedPostsAsync(blogKey, post.RelatedPostIds, ct);
+    }
+
     return Page();
   }
 }

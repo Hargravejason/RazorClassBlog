@@ -56,6 +56,17 @@ public class SQLBlogDbContext : DbContext, IBlogDbContext
         .HasConversion(tagsConverter)
         .HasMaxLength(1024);
 
+    // RelatedPostIds: List<string> -> comma-separated string
+    var relatedPostIdsConverter = new ValueConverter<List<string>, string>(
+        v => string.Join(",", v ?? new List<string>()),
+        v => string.IsNullOrWhiteSpace(v)
+            ? new List<string>()
+            : v.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList());
+
+    blog.Property(p => p.RelatedPostIds)
+        .HasConversion(relatedPostIdsConverter)
+        .HasMaxLength(2048);
+
     // Indexes for quick lookups and SEO
     blog.HasIndex(p => new { p.BlogKey, p.Slug })
         .IsUnique();

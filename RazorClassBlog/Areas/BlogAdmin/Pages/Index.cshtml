@@ -108,7 +108,14 @@ else
                     <span class="badge bg-secondary">Draft</span>
                     break;
                   case BlogPostStatus.Published:
-                    <span class="badge bg-success">Published</span>
+                    if (post.DeletedUtc != null)
+                    {
+                      <span class="badge bg-danger">Deleted</span>
+                    }
+                    else
+                    {
+                      <span class="badge bg-success">Published</span>
+                    }
                     break;
                   case BlogPostStatus.Archived:
                     <span class="badge bg-warning text-dark">Archived</span>
