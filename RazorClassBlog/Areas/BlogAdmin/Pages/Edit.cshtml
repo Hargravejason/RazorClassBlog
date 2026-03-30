@@ -217,17 +217,27 @@
 			tinymce.init({
 					selector: 'textarea[name="Post.Content"]',
 					height: 500,
-					menubar: false,
+					menubar: 'file edit view insert format tools table',
+					powerpaste_allow_local_images: true,
 					plugins: [
-							'advlist autolink lists link image charmap preview anchor',
-							'searchreplace visualblocks code fullscreen',
-							'media table code help wordcount'
+						'advlist', 'anchor', 'autolink', 'codesample', 'fullscreen', 'help',
+						'image', 'lists', 'link', 'media', 'preview',
+						'searchreplace', 'table', 'visualblocks', 'wordcount'
 					],
-					toolbar: 'undo redo | formatselect | ' +
-										'bold italic underline | forecolor backcolor | ' +
+					toolbar: 'undo redo | blocks fontfamily fontsize | ' +
+										'bold italic underline strikethrough | forecolor backcolor | ' +
 										'alignleft aligncenter alignright alignjustify | ' +
-										'bullist numlist outdent indent | removeformat | help',
-					content_style: 'body { font-family: system-ui; font-size:14px }'
+										'bullist numlist outdent indent blockquote | ' +
+										'link image media table charmap emoticons | removeformat | help',
+					toolbar_mode: 'sliding',
+					spellchecker_dialog: true,
+					spellchecker_ignore_list: ['Ephox', 'Moxiecode'],
+					quickbars_selection_toolbar: 'bold italic underline | forecolor backcolor | blocks | quicklink blockquote',
+					quickbars_insert_toolbar: 'image media table',
+					image_title: true,
+					image_caption: true,
+					content_style: 'body { font-family: system-ui; font-size:14px }',
+					license_key: 'gpl'
 			});
 
 			// Elements

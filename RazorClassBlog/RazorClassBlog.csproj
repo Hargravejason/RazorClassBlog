@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>1.0.1</VersionPrefix>
-		<PackageReleaseNotes>Updated to allow uploads of images to blob storage.</PackageReleaseNotes>
+		<VersionPrefix>1.0.2</VersionPrefix>
+		<PackageReleaseNotes>Updated updated TinyMCE editor, added in related content option.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
