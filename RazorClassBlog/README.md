@@ -131,6 +131,17 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
 
   //options.PublicRoutePrefix = "/blog";     // default; change if you want a different public blog route
   //options.PublicDisplayName = "Blog";      // default; change if you want a different public blog name
+
+  // when set, enables image upload functionality in the blog admin (and requires Azure Blob Storage account)
+  options.BlobStorageConnectionString = builder.Configuration["Blogging:BlobStorageConnectionString"]; 
+  // optional CDN base URL to build public image URLs (e.g. "https://cdn.example.com"). If not set, falls back to blob storage URL which may or may not be publicly accessible depending on your blob storage configuration.
+  options.BlobStorageCdnBaseUrl = builder.Configuration["Blogging:BlobStorageCdnBaseUrl"]; 
+  // optional container/folder path for blog images in blob storage (default: "blog-images"). Can be used to organize images within a container or specify a subfolder if using a flat blob storage structure.
+  options.BlobStorageContainerPath = builder.Configuration["Blogging:BlobStorageContainerPath"] ?? "blog-images"; 
+  
+  // when true, allows posts that are already published to be previewed on the live site before they go live. When false, only unpublished posts can be previewed. 
+  // this is useful to allow content editors to preview changes in the live site before its publically found.
+  options.AllowPreviewOfPublishedPosts = true; 
 });
 ```
 

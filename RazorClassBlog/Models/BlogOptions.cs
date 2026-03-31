@@ -93,4 +93,8 @@ public class BlogOptions
   /// </summary>
   public string BlobStorageContainerPath { get; set; } = "media";
 
+  /// <summary>
+  /// Allows previewing of posts that have been published, but not yet reached their scheduled publish date.
+  /// </summary>
+  public bool AllowPreviewOfPublishedPosts { get; set; } = false;
 }

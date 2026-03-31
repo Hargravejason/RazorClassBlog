@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>1.0.2</VersionPrefix>
-		<PackageReleaseNotes>Updated updated TinyMCE editor, added in related content option.</PackageReleaseNotes>
+		<VersionPrefix>1.0.3</VersionPrefix>
+		<PackageReleaseNotes>Added flag to allow previewing of published posts before their scheduled publish date.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		

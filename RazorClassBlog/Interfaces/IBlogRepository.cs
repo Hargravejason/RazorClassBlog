@@ -7,7 +7,7 @@ public interface IBlogRepository
 {
   Task<BlogPost?> GetByIdAsync(string blogKey, string id, CancellationToken ct = default);
 
-  Task<BlogPost?> GetBySlugAsync(string blogKey, string slug, bool includeUnpublished = false, CancellationToken ct = default);
+  Task<BlogPost?> GetBySlugAsync(string blogKey, string slug, bool includeUnpublished = false, bool showPrePublished = false, CancellationToken ct = default);
 
   Task<PagedResult<BlogPostMini>> QueryAsync(BlogQuery query, CancellationToken ct = default);
 

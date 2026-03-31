@@ -25,7 +25,7 @@ public class PostModel : PageModel
   {
     var blogKey = _options.BlogKey;
 
-    var post = await _blogService.GetPublicPostBySlugAsync(blogKey, slug, ct);
+    var post = await _blogService.GetPublicPostBySlugAsync(blogKey, slug, _options.AllowPreviewOfPublishedPosts, ct);
     if (post == null)
     {
       return NotFound();

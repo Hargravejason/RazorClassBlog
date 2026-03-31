@@ -3,7 +3,6 @@ using RazorClassBlog.Abstractions;
 using RazorClassBlog.EnumsandConstants;
 using RazorClassBlog.Interfaces;
 using RazorClassBlog.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace RazorClassBlog.Services;
 
@@ -34,12 +33,12 @@ public class BlogService : IBlogService
     return _repository.QueryAsync(query, ct);
   }
 
-  public Task<BlogPost?> GetPublicPostBySlugAsync(string blogKey, string slug, CancellationToken ct = default)
+  public Task<BlogPost?> GetPublicPostBySlugAsync(string blogKey, string slug, bool showPrePublished, CancellationToken ct = default)
   {
     if (string.IsNullOrWhiteSpace(blogKey))
       blogKey = _options.BlogKey;
 
-    return _repository.GetBySlugAsync(blogKey, slug, includeUnpublished: false, ct);
+    return _repository.GetBySlugAsync(blogKey, slug, includeUnpublished: false, showPrePublished, ct);
   }
 
   public Task<BlogPost?> GetPostByIdAsync(string blogKey, string id, CancellationToken ct = default)

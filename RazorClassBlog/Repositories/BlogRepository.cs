@@ -18,17 +18,23 @@ public class BlogRepository : IBlogRepository
   public async Task<BlogPost?> GetByIdAsync(string blogKey, string id, CancellationToken ct = default) =>
     await _db.BlogPosts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id && p.BlogKey == blogKey, ct);
 
-  public async Task<BlogPost?> GetBySlugAsync(string blogKey, string slug, bool includeUnpublished = false, CancellationToken ct = default)
+  public async Task<BlogPost?> GetBySlugAsync(string blogKey, string slug, bool includeUnpublished = false, bool showPrePublished = false, CancellationToken ct = default)
   {
     var query = _db.BlogPosts.AsNoTracking().Where(p => p.BlogKey == blogKey && p.Slug == slug);
 
-    if (!includeUnpublished)
+    if (showPrePublished)
+    {
+      query = query.Where(p =>
+          p.Status == BlogPostStatus.Published);
+    } 
+    else if (!includeUnpublished)
     {
       var now = DateTimeOffset.UtcNow;
       query = query.Where(p =>
           p.Status == BlogPostStatus.Published &&
           p.PublishedUtc <= now);
     }
+    
 
     return await query.FirstOrDefaultAsync(ct);
   }
