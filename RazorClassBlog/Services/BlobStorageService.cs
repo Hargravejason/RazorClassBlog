@@ -1,3 +1,4 @@
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
@@ -33,9 +34,17 @@ public class BlobStorageService : IBlobStorageService
   {
     var (containerClient, folderPrefix) = GetContainerAndFolder();
 
-    await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob, cancellationToken: ct);
-    // Note: PublicAccessType.Blob grants anonymous read for individual blobs (not container listing).
-    // Blog images are intended to be publicly reachable (embedded in published posts / served via CDN).
+    try
+    {
+      await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob, cancellationToken: ct);
+      // Note: PublicAccessType.Blob grants anonymous read for individual blobs (not container listing).
+      // Blog images are intended to be publicly reachable (embedded in published posts / served via CDN).
+    }
+    catch (RequestFailedException ex) when (ex.Status == 409)
+    {
+      // The container already exists (or public access is restricted at the storage-account level).
+      // Either way the container is present and we can safely continue uploading.
+    }
 
     var blobName = BuildBlobName(folderPrefix, postId, fileName);
     var blobClient = containerClient.GetBlobClient(blobName);
