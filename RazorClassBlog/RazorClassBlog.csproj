@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>1.0.3</VersionPrefix>
-		<PackageReleaseNotes>Added flag to allow previewing of published posts before their scheduled publish date.</PackageReleaseNotes>
+		<VersionPrefix>1.0.4</VersionPrefix>
+		<PackageReleaseNotes>Added ability to publish posts in the past, as well as standardized the blog hero image sizing.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
