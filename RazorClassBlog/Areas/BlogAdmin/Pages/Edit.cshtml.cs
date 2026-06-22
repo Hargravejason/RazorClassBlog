@@ -118,18 +118,6 @@ public class EditModel : PageModel
         Post.CreatedUtc = DateTimeOffset.UtcNow;
     }
 
-    // If publishing and we have a publish time, ensure it isn't before creation
-    if (Publish && Post.PublishedUtc.HasValue)
-    {
-      if (Post.PublishedUtc.Value.ToUniversalTime() < Post.CreatedUtc)
-      {
-        ModelState.AddModelError("Post.PublishedUtc", "Publish date cannot be earlier than the created date.");
-
-        // Re-show page with validation error
-        return Page();
-      }
-    }
-
     string? authorId = User?.Identity?.IsAuthenticated == true ? User.Identity!.Name : null;
 
     var saved = await _blogService.CreateOrUpdatePostAsync(Post, publish: Publish, authorId: authorId, ct);
