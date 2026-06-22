@@ -90,6 +90,9 @@
 					<span class="form-text">
 						Leave as-is to publish immediately, or set a future time to schedule.
 					</span>
+					<div id="publishPastWarning" class="form-text text-warning mt-1" style="display:none;">
+						Warning: publish date/time is in the past. This post will publish immediately.
+					</div>
 				</div>
 
 				<div class="mb-3">
@@ -245,7 +248,10 @@
 			const dateContainer = document.getElementById("publishDateContainer");
 			const publishUtc = document.getElementById("Post_PublishedUtc");
 			const localInput = document.getElementById("publishLocal");
+			const publishPastWarning = document.getElementById("publishPastWarning");
 			const form = document.querySelector("form");
+			let hasUserChangedPublishDate = false;
+			let initialPublishLocalValue = "";
 
 			// Utility: format current time for <input type="datetime-local">
 			function getCurrentLocalDatetimeString(d) {
@@ -293,11 +299,53 @@
 				publishUtc.value = isNaN(d.getTime()) ? "" : d.toISOString();
 			}
 
+			function isPastPublishSelection(localValue) {
+				if (!localValue) return false;
+
+				const selected = new Date(localValue);
+				if (isNaN(selected.getTime())) return false;
+
+				const now = new Date();
+				const selectedDateOnly = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate());
+				const todayDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+				if (selectedDateOnly < todayDateOnly) {
+					return true;
+				}
+
+				if (selectedDateOnly.getTime() === todayDateOnly.getTime()) {
+					return (now.getTime() - selected.getTime()) > (60 * 60 * 1000);
+				}
+
+				return false;
+			}
+
+			function refreshPastWarning() {
+				if (!publishPastWarning) return;
+
+				const dateChanged = localInput.value !== initialPublishLocalValue;
+				const shouldWarn = publishToggle.checked && hasUserChangedPublishDate && dateChanged && isPastPublishSelection(localInput.value);
+				publishPastWarning.style.display = shouldWarn ? "" : "none";
+			}
+
 			// Toggle logic
-			publishToggle.addEventListener("change", refreshVisibility);
-			localInput.addEventListener("change", localToUtcIso);
-			localInput.addEventListener("input", localToUtcIso);
+			publishToggle.addEventListener("change", function() {
+				refreshVisibility();
+				refreshPastWarning();
+			});
+			localInput.addEventListener("change", function() {
+				hasUserChangedPublishDate = true;
+				localToUtcIso();
+				refreshPastWarning();
+			});
+			localInput.addEventListener("input", function() {
+				hasUserChangedPublishDate = true;
+				localToUtcIso();
+				refreshPastWarning();
+			});
 			refreshVisibility(); // run on page load
+			initialPublishLocalValue = localInput.value;
+			refreshPastWarning();
 
 			const autosaveIntervalMs = 30000; // every 30 seconds
 			let autosaveTimer = null;
