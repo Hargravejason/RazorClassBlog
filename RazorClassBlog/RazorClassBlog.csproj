@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>1.0.5</VersionPrefix>
-		<PackageReleaseNotes>Updated hero image sizing to "Scale-Down" so that images uploaded with weird sizes fit in the boxed area.</PackageReleaseNotes>
+		<VersionPrefix>1.0.6</VersionPrefix>
+		<PackageReleaseNotes>Updated hero image sizing to "Contain" so that images uploaded with weird sizes fit in the boxed area. This replaces the previous "Scale-Down" behavior, which caused some images to be too small.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		

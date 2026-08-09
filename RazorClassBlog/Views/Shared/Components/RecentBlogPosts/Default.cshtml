@@ -16,7 +16,7 @@
               @if (!string.IsNullOrWhiteSpace(post.HeroImageUrl))
               {
                 <div class="col-12 col-md-4">
-                  <img src="@post.HeroImageUrl" class="img-fluid rounded-start w-100 h-100" style="object-fit:cover; min-height:160px;" alt="@post.Title" loading="lazy" decoding="async" />
+                  <img src="@post.HeroImageUrl" class="img-fluid rounded-start w-100 h-100" style="object-fit:contain; min-height:160px;" alt="@post.Title" loading="lazy" decoding="async" />
                 </div>
               }
               <div class="@(string.IsNullOrWhiteSpace(post.HeroImageUrl) ? "col-12" : "col-12 col-md-8")">
@@ -49,7 +49,7 @@
               @if (!string.IsNullOrWhiteSpace(post.HeroImageUrl))
               {
                 <div class="ratio ratio-16x9">
-                  <img src="@post.HeroImageUrl" class="w-100 h-100" style="object-fit:cover;" alt="@post.Title" loading="lazy" decoding="async" />
+                  <img src="@post.HeroImageUrl" class="w-100 h-100" style="object-fit:contain;" alt="@post.Title" loading="lazy" decoding="async" />
                 </div>
               }
               <div class="card-body">
