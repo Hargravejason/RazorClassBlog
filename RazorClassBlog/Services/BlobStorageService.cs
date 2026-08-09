@@ -65,7 +65,7 @@ public class BlobStorageService : IBlobStorageService
 
     var results = new List<string>();
 
-    await foreach (var item in containerClient.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
+    await foreach (var item in containerClient.GetBlobsAsync(new GetBlobsOptions { Prefix = prefix }, cancellationToken: ct))
     {
       var blobClient = containerClient.GetBlobClient(item.Name);
       results.Add(BuildUrl(blobClient.Uri.ToString(), item.Name));
@@ -101,7 +101,7 @@ public class BlobStorageService : IBlobStorageService
         ? $"{postId}/"
         : $"{folderPrefix}/{postId}/";
 
-    await foreach (var item in containerClient.GetBlobsAsync(prefix: prefix, cancellationToken: ct))
+    await foreach (var item in containerClient.GetBlobsAsync(new GetBlobsOptions { Prefix = prefix }, cancellationToken: ct))
     {
       await containerClient.GetBlobClient(item.Name).DeleteIfExistsAsync(cancellationToken: ct);
     }

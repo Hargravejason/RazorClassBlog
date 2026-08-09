@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>1.0.4</VersionPrefix>
-		<PackageReleaseNotes>Added ability to publish posts in the past, as well as standardized the blog hero image sizing.</PackageReleaseNotes>
+		<VersionPrefix>1.0.5</VersionPrefix>
+		<PackageReleaseNotes>Updated hero image sizing to "Scale-Down" so that images uploaded with weird sizes fit in the boxed area.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
@@ -43,7 +43,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.29.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
 	</ItemGroup>
 </Project>
