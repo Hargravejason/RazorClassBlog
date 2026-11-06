@@ -19,6 +19,7 @@ public static class BlogServiceCollectionExtensions
 
     services.TryAddScoped<IBlogRepository, Repositories.BlogRepository>();
     services.TryAddScoped<IBlogService, BlogService>();
+    services.TryAddScoped<IBlogSubscriptionService, BlogSubscriptionService>();
     services.TryAddSingleton<IBlobStorageService, BlobStorageService>();
 
     // Database configuration items
