@@ -11,6 +11,8 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
   }
 
   public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+  public DbSet<BlogSubscriber> BlogSubscribers => Set<BlogSubscriber>();
+  public DbSet<BlogPostDelivery> BlogPostDeliveries => Set<BlogPostDelivery>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -21,5 +23,15 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
     blog.ToContainer("BlogPosts");          // Cosmos-specific
     blog.HasPartitionKey(p => p.BlogKey);   // choose your partition key
     blog.HasNoDiscriminator();
+
+    var subscribers = modelBuilder.Entity<BlogSubscriber>();
+    subscribers.ToContainer("BlogSubscribers");
+    subscribers.HasPartitionKey(s => s.BlogKey);
+    subscribers.HasNoDiscriminator();
+
+    var deliveries = modelBuilder.Entity<BlogPostDelivery>();
+    deliveries.ToContainer("BlogPostDeliveries");
+    deliveries.HasPartitionKey(d => d.BlogKey);
+    deliveries.HasNoDiscriminator();
   }
 }

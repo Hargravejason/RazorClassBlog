@@ -10,6 +10,8 @@ public class SQLBlogDbContext : DbContext, IBlogDbContext
   public SQLBlogDbContext(DbContextOptions<SQLBlogDbContext> options) : base(options) { }
 
   public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+  public DbSet<BlogSubscriber> BlogSubscribers => Set<BlogSubscriber>();
+  public DbSet<BlogPostDelivery> BlogPostDeliveries => Set<BlogPostDelivery>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -75,5 +77,26 @@ public class SQLBlogDbContext : DbContext, IBlogDbContext
 
     blog.Property(p => p.Status)
         .HasConversion<int>(); // store enum as int
+
+    var subscriber = modelBuilder.Entity<BlogSubscriber>();
+    subscriber.ToTable("BlogSubscribers");
+    subscriber.HasKey(s => s.Id);
+    subscriber.Property(s => s.Id).HasMaxLength(64).IsRequired();
+    subscriber.Property(s => s.BlogKey).HasMaxLength(64).IsRequired();
+    subscriber.Property(s => s.Email).HasMaxLength(320).IsRequired();
+    subscriber.Property(s => s.NormalizedEmail).HasMaxLength(320).IsRequired();
+    subscriber.Property(s => s.ConfirmationTokenHash).HasMaxLength(64);
+    subscriber.HasIndex(s => new { s.BlogKey, s.NormalizedEmail }).IsUnique();
+
+    var delivery = modelBuilder.Entity<BlogPostDelivery>();
+    delivery.ToTable("BlogPostDeliveries");
+    delivery.HasKey(d => d.Id);
+    delivery.Property(d => d.Id).HasMaxLength(64).IsRequired();
+    delivery.Property(d => d.BlogKey).HasMaxLength(64).IsRequired();
+    delivery.Property(d => d.SubscriberId).HasMaxLength(64).IsRequired();
+    delivery.Property(d => d.PostId).HasMaxLength(450).IsRequired();
+    delivery.Property(d => d.UnsubscribeTokenHash).HasMaxLength(64).IsRequired();
+    delivery.HasIndex(d => new { d.BlogKey, d.SubscriberId, d.PostId }).IsUnique();
+    delivery.HasIndex(d => new { d.BlogKey, d.UnsubscribeTokenHash }).IsUnique();
   }
 }

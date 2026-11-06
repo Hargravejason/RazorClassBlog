@@ -43,6 +43,7 @@ This was also a practical test to try an use AI (GPT5) to develop as much out of
 * Canonical URLs and meta descriptions
 * Structured data (BlogPosting / Article)
 * Open Graph & Twitter Card metadata
+* Optional email subscriptions with address confirmation, per-post delivery tracking, and confirmed unsubscribe
 
 ### Admin UI (optional for a public facing side, can be turned off)
 
@@ -160,6 +161,23 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
 ```
+
+### Email subscriptions
+
+Subscriptions are enabled when the host configures an email callback. The host remains responsible for sending mail through its chosen provider:
+
+```csharp
+options.PublicBaseUrl = builder.Configuration["Blogging:PublicBaseUrl"];
+options.SubscriptionConfirmationMessage = "Confirm your address to receive new articles.";
+options.SendEmailAsync = async (recipient, subject, htmlBody, cancellationToken) =>
+{
+    await yourEmailProvider.SendAsync(recipient, subject, htmlBody, cancellationToken);
+};
+```
+
+The public blog index displays the subscription form when both `SendEmailAsync` and a valid `PublicBaseUrl` are configured. Subscribers must confirm their address before post notifications are sent. Delivery records prevent sending a post to the same subscriber again, and unsubscribe links require confirmation on the site. Set `PublicBaseUrl` to the canonical site origin (and application path, if applicable) so generated email links do not depend on an incoming request host.
+
+The blog data context must expose `BlogSubscribers` and `BlogPostDeliveries` alongside `BlogPosts`. The supplied Cosmos context creates separate containers when its database is created. Hosts using SQL should apply the corresponding schema changes through their normal EF Core migration process.
 
 ## Admin UI & security
 
