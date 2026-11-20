@@ -125,9 +125,10 @@ public class BlogSubscriptionService : IBlogSubscriptionService
 
     foreach (var subscriber in subscribers)
     {
-      var alreadySent = await _db.BlogPostDeliveries.AnyAsync(
+      //switched to countasync to support db systems like cosmosdb that don't support .AnyAsync
+      var alreadySent = await _db.BlogPostDeliveries.CountAsync(
           d => d.BlogKey == post.BlogKey && d.SubscriberId == subscriber.Id && d.PostId == post.Id, ct);
-      if (alreadySent)
+      if (alreadySent > 0)
         continue;
 
       var token = CreateToken();

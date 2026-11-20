@@ -50,6 +50,13 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
   // when true, allows posts that are already published to be previewed on the live site before they go live. When false, only unpublished posts can be previewed. 
   // this is useful to allow content editors to preview changes in the live site before its publically found.
   options.AllowPreviewOfPublishedPosts = true;
+
+  options.PublicBaseUrl = builder.Configuration["Blogging:PublicBaseUrl"];
+  options.SubscriptionConfirmationMessage = "Confirm your address to receive new articles.";
+  options.SendEmailAsync = async (recipient, subject, htmlBody, cancellationToken) =>
+  {
+    Console.WriteLine($"Email sent to {recipient} with subject '{subject}'\n\n{htmlBody}");
+  };
 });
 
 var app = builder.Build();
