@@ -16,7 +16,7 @@
 		<Title>RazorClassBlog</Title>
 		<Description>Basic Razor Class Library Blog System</Description>
 		<Authors>Jason Hargrave</Authors>
-		<Copyright>2025</Copyright>
+		<Copyright>2026</Copyright>
 
 		<VersionPrefix>1.1.0</VersionPrefix>
 		<PackageReleaseNotes>Updated system to allow subscribing to posts.</PackageReleaseNotes>
