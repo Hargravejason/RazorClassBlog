@@ -88,8 +88,8 @@ public class BlogSubscriptionService : IBlogSubscriptionService
   public async Task<bool> IsUnsubscribeTokenValidAsync(string token, CancellationToken ct = default)
   {
     var tokenHash = HashToken(token);
-    return await _db.BlogPostDeliveries.AnyAsync(
-        d => d.BlogKey == _options.BlogKey && d.UnsubscribeTokenHash == tokenHash, ct);
+    return (await _db.BlogPostDeliveries.CountAsync(
+        d => d.BlogKey == _options.BlogKey && d.UnsubscribeTokenHash == tokenHash, ct)) > 0;
   }
 
   public async Task UnsubscribeAsync(string token, CancellationToken ct = default)
