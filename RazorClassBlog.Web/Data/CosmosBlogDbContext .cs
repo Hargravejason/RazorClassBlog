@@ -13,6 +13,7 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
   public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
   public DbSet<BlogSubscriber> BlogSubscribers => Set<BlogSubscriber>();
   public DbSet<BlogPostDelivery> BlogPostDeliveries => Set<BlogPostDelivery>();
+  public DbSet<BlogEmailTemplate> BlogEmailTemplates => Set<BlogEmailTemplate>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -33,5 +34,10 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
     deliveries.ToContainer("BlogPostDeliveries");
     deliveries.HasPartitionKey(d => d.BlogKey);
     deliveries.HasNoDiscriminator();
+
+    var emailTemplates = modelBuilder.Entity<BlogEmailTemplate>();
+    emailTemplates.ToContainer("BlogEmailTemplates");
+    emailTemplates.HasPartitionKey(t => t.BlogKey);
+    emailTemplates.HasNoDiscriminator();
   }
 }

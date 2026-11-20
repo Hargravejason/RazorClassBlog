@@ -10,4 +10,7 @@ public interface IBlogSubscriptionService
   Task UnsubscribeAsync(string token, CancellationToken ct = default);
   Task<IReadOnlyList<string>> GetSubscribedEmailsAsync(CancellationToken ct = default);
   Task SendPostToSubscribersAsync(BlogPost post, CancellationToken ct = default);
+  Task SendDuePostNotificationsAsync(DateTimeOffset throughUtc, CancellationToken ct = default);
+  Task<BlogEmailTemplate> GetEmailTemplateAsync(CancellationToken ct = default);
+  Task SaveEmailTemplateAsync(BlogEmailTemplate template, CancellationToken ct = default);
 }

@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using RazorClassBlog.EnumsandConstants;
 using RazorClassBlog.Interfaces;
 using RazorClassBlog.Models;
 
@@ -56,11 +59,16 @@ public class BlogSubscriptionService : IBlogSubscriptionService
       _db.BlogSubscribers.Add(subscriber);
     await _db.SaveChangesAsync(ct);
 
-    var message = HtmlEncoder.Default.Encode(_options.SubscriptionConfirmationMessage ?? string.Empty)
-        .Replace("\r\n", "<br>", StringComparison.Ordinal)
-        .Replace("\n", "<br>", StringComparison.Ordinal);
-    var body = $"<p>{message}</p><p><a href=\"{HtmlEncoder.Default.Encode(confirmationUrl)}\">Confirm subscription</a></p>";
-    await sendEmail(email, "Confirm your blog subscription", body, ct);
+    var template = await GetEmailTemplateAsync(ct);
+    var replacements = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+      ["[Email]"] = email,
+      ["[ConfirmationMessage]"] = _options.SubscriptionConfirmationMessage ?? string.Empty,
+      ["[ConfirmationUrl]"] = confirmationUrl
+    };
+    var subject = RenderTemplate(template.ConfirmationSubject ?? string.Empty, replacements, encodeHtml: false);
+    var body = RenderTemplate(template.ConfirmationHtml ?? string.Empty, replacements, encodeHtml: true);
+    await sendEmail(email, CleanSubject(subject), body, ct);
   }
 
   public async Task ConfirmSubscriptionAsync(string token, CancellationToken ct = default)
@@ -111,17 +119,83 @@ public class BlogSubscriptionService : IBlogSubscriptionService
 
   public async Task SendPostToSubscribersAsync(BlogPost post, CancellationToken ct = default)
   {
+    if (post.Status != BlogPostStatus.Published ||
+        post.DeletedUtc is not null ||
+        post.PublishedUtc is not { } publishedUtc ||
+        publishedUtc > DateTimeOffset.UtcNow)
+      return;
+
+    await SendPostToSubscribersCoreAsync(post, ct);
+  }
+
+  public async Task SendDuePostNotificationsAsync(DateTimeOffset throughUtc, CancellationToken ct = default)
+  {
+    if (_options.SendEmailAsync is null)
+      return;
+
+    var posts = await _db.BlogPosts.AsNoTracking()
+        .Where(p => p.BlogKey == _options.BlogKey &&
+                    p.Status == BlogPostStatus.Published &&
+                    p.PublishedUtc != null &&
+                    p.PublishedUtc <= throughUtc &&
+                    p.DeletedUtc == null)
+        .ToListAsync(ct);
+
+    foreach (var post in posts)
+      await SendPostToSubscribersCoreAsync(post, ct);
+  }
+
+  public async Task<BlogEmailTemplate> GetEmailTemplateAsync(CancellationToken ct = default)
+  {
+    return await _db.BlogEmailTemplates.AsNoTracking()
+        .FirstOrDefaultAsync(t => t.BlogKey == _options.BlogKey, ct)
+        ?? new BlogEmailTemplate
+        {
+          Id = HashToken(_options.BlogKey),
+          BlogKey = _options.BlogKey
+        };
+  }
+
+  public async Task SaveEmailTemplateAsync(BlogEmailTemplate template, CancellationToken ct = default)
+  {
+    var stored = await _db.BlogEmailTemplates.FirstOrDefaultAsync(
+        t => t.BlogKey == _options.BlogKey, ct);
+    if (stored is null)
+    {
+      stored = new BlogEmailTemplate
+      {
+        Id = HashToken(_options.BlogKey),
+        BlogKey = _options.BlogKey
+      };
+      _db.BlogEmailTemplates.Add(stored);
+    }
+
+    stored.ConfirmationSubject = template.ConfirmationSubject ?? string.Empty;
+    stored.ConfirmationHtml = template.ConfirmationHtml ?? string.Empty;
+    stored.PostSubject = template.PostSubject ?? string.Empty;
+    stored.PostHtml = template.PostHtml ?? string.Empty;
+    stored.UpdatedUtc = DateTimeOffset.UtcNow;
+    await _db.SaveChangesAsync(ct);
+  }
+
+  private async Task SendPostToSubscribersCoreAsync(BlogPost post, CancellationToken ct)
+  {
     var sendEmail = _options.SendEmailAsync;
     if (sendEmail is null)
       return;
 
+    var publishedUtc = post.PublishedUtc ?? post.CreatedUtc;
     var subscribers = await _db.BlogSubscribers
-        .Where(s => s.BlogKey == post.BlogKey && s.IsConfirmed && s.IsActive)
+        .Where(s => s.BlogKey == post.BlogKey &&
+                    s.IsConfirmed &&
+                    s.IsActive &&
+                    s.CreatedUtc < publishedUtc)
         .ToListAsync(ct);
     if (subscribers.Count == 0)
       return;
 
     var postUrl = BuildPostUrl(post);
+    var template = await GetEmailTemplateAsync(ct);
 
     foreach (var subscriber in subscribers)
     {
@@ -133,13 +207,11 @@ public class BlogSubscriptionService : IBlogSubscriptionService
 
       var token = CreateToken();
       var unsubscribeUrl = BuildUrl("/Unsubscribe", token);
-      var title = HtmlEncoder.Default.Encode(post.Title);
-      var summary = HtmlEncoder.Default.Encode(post.Summary ?? string.Empty);
-      var body = $"<h1>{title}</h1><p>{summary}</p><p><a href=\"{HtmlEncoder.Default.Encode(postUrl)}\">Read the post</a></p><p><a href=\"{HtmlEncoder.Default.Encode(unsubscribeUrl)}\">Unsubscribe</a></p>";
-      var subjectTitle = post.Title.Replace("\r", string.Empty, StringComparison.Ordinal)
-          .Replace("\n", string.Empty, StringComparison.Ordinal);
+      var replacements = GetPostReplacements(post, subscriber.Email, postUrl, unsubscribeUrl);
+      var subject = RenderTemplate(template.PostSubject ?? string.Empty, replacements, encodeHtml: false);
+      var body = RenderTemplate(template.PostHtml ?? string.Empty, replacements, encodeHtml: true);
 
-      await sendEmail(subscriber.Email, $"New blog post: {subjectTitle}", body, ct);
+      await sendEmail(subscriber.Email, CleanSubject(subject), body, ct);
       _db.BlogPostDeliveries.Add(new BlogPostDelivery
       {
         Id = HashToken($"{subscriber.Id}:{post.Id}"),
@@ -152,6 +224,52 @@ public class BlogSubscriptionService : IBlogSubscriptionService
       await _db.SaveChangesAsync(ct);
     }
   }
+
+  private static Dictionary<string, string> GetPostReplacements(
+      BlogPost post,
+      string email,
+      string postUrl,
+      string unsubscribeUrl)
+  {
+    return new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+      ["[Email]"] = email,
+      ["[PostUrl]"] = postUrl,
+      ["[UnsubscribeUrl]"] = unsubscribeUrl,
+      ["[Id]"] = post.Id,
+      ["[BlogKey]"] = post.BlogKey,
+      ["[Title]"] = post.Title,
+      ["[Slug]"] = post.Slug ?? string.Empty,
+      ["[Summary]"] = post.Summary ?? string.Empty,
+      ["[HeroImageUrl]"] = post.HeroImageUrl ?? string.Empty,
+      ["[Tags]"] = string.Join(", ", post.Tags),
+      ["[Status]"] = post.Status.ToString(),
+      ["[CreatedUtc]"] = post.CreatedUtc.ToString("O", CultureInfo.InvariantCulture),
+      ["[PublishedUtc]"] = post.PublishedUtc?.ToString("O", CultureInfo.InvariantCulture) ?? string.Empty,
+      ["[UpdatedUtc]"] = post.UpdatedUtc?.ToString("O", CultureInfo.InvariantCulture) ?? string.Empty,
+      ["[AuthorId]"] = post.AuthorId ?? string.Empty,
+      ["[AuthorName]"] = post.AuthorName ?? string.Empty,
+      ["[DeletedUtc]"] = post.DeletedUtc?.ToString("O", CultureInfo.InvariantCulture) ?? string.Empty,
+      ["[DeletedBy]"] = post.DeletedBy ?? string.Empty,
+      ["[Content]"] = post.Content,
+      ["[RelatedPostIds]"] = string.Join(", ", post.RelatedPostIds)
+    };
+  }
+
+  private static string RenderTemplate(
+      string template,
+      IReadOnlyDictionary<string, string> replacements,
+      bool encodeHtml)
+  {
+    return Regex.Replace(template, @"\[[A-Za-z]+\]", match =>
+        replacements.TryGetValue(match.Value, out var value)
+            ? encodeHtml ? HtmlEncoder.Default.Encode(value) : value
+            : match.Value);
+  }
+
+  private static string CleanSubject(string subject) =>
+      subject.Replace("\r", string.Empty, StringComparison.Ordinal)
+          .Replace("\n", string.Empty, StringComparison.Ordinal).Trim();
 
   private string BuildPostUrl(BlogPost post)
   {

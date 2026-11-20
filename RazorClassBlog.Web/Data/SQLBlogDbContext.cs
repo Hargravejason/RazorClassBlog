@@ -12,6 +12,7 @@ public class SQLBlogDbContext : DbContext, IBlogDbContext
   public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
   public DbSet<BlogSubscriber> BlogSubscribers => Set<BlogSubscriber>();
   public DbSet<BlogPostDelivery> BlogPostDeliveries => Set<BlogPostDelivery>();
+  public DbSet<BlogEmailTemplate> BlogEmailTemplates => Set<BlogEmailTemplate>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -98,5 +99,14 @@ public class SQLBlogDbContext : DbContext, IBlogDbContext
     delivery.Property(d => d.UnsubscribeTokenHash).HasMaxLength(64).IsRequired();
     delivery.HasIndex(d => new { d.BlogKey, d.SubscriberId, d.PostId }).IsUnique();
     delivery.HasIndex(d => new { d.BlogKey, d.UnsubscribeTokenHash }).IsUnique();
+
+    var emailTemplate = modelBuilder.Entity<BlogEmailTemplate>();
+    emailTemplate.ToTable("BlogEmailTemplates");
+    emailTemplate.HasKey(t => t.Id);
+    emailTemplate.Property(t => t.Id).HasMaxLength(64).IsRequired();
+    emailTemplate.Property(t => t.BlogKey).HasMaxLength(64).IsRequired();
+    emailTemplate.Property(t => t.ConfirmationSubject).HasMaxLength(998).IsRequired();
+    emailTemplate.Property(t => t.PostSubject).HasMaxLength(998).IsRequired();
+    emailTemplate.HasIndex(t => t.BlogKey).IsUnique();
   }
 }

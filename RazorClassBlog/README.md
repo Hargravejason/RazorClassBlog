@@ -175,9 +175,19 @@ options.SendEmailAsync = async (recipient, subject, htmlBody, cancellationToken)
 };
 ```
 
-The public blog index displays the subscription form when both `SendEmailAsync` and a valid `PublicBaseUrl` are configured. Subscribers must confirm their address before post notifications are sent. Delivery records prevent sending a post to the same subscriber again, and unsubscribe links require confirmation on the site. Set `PublicBaseUrl` to the canonical site origin (and application path, if applicable) so generated email links do not depend on an incoming request host.
+The public blog index and the end of each article display the subscription form when both `SendEmailAsync` and a valid `PublicBaseUrl` are configured. Subscribers must confirm their address before post notifications are sent. Delivery records prevent sending a post to the same subscriber again, and unsubscribe links require confirmation on the site. Set `PublicBaseUrl` to the canonical site origin (and application path, if applicable) so generated email links do not depend on an incoming request host.
 
-The blog data context must expose `BlogSubscribers` and `BlogPostDeliveries` alongside `BlogPosts`. The supplied Cosmos context creates separate containers when its database is created. Hosts using SQL should apply the corresponding schema changes through their normal EF Core migration process.
+The authorized `/BlogAdmin/SubscriptionEmails` page configures the confirmation and post notification subject and HTML body. Templates support `[Email]`, `[ConfirmationMessage]`, and `[ConfirmationUrl]` for confirmation email. Post notification templates support `[Email]`, `[PostUrl]`, `[UnsubscribeUrl]`, and article fields such as `[Title]`, `[Summary]`, `[Content]`, `[AuthorName]`, `[Tags]`, and `[PublishedUtc]`; the admin page lists all supported fields. Placeholder values are HTML-encoded in bodies.
+
+An external cron job or background runner can distribute notifications for scheduled posts by resolving the subscription service and calling:
+
+```csharp
+await subscriptionService.SendDuePostNotificationsAsync(DateTimeOffset.UtcNow, cancellationToken);
+```
+
+The method finds non-deleted posts with `Published` status and `PublishedUtc` at or before the supplied time. It only sends to confirmed subscribers created before the post's publish time, and skips deliveries already recorded.
+
+The blog data context must expose `BlogSubscribers`, `BlogPostDeliveries`, and `BlogEmailTemplates` alongside `BlogPosts`. The supplied Cosmos context creates separate containers when its database is created. Hosts using SQL should apply the corresponding schema changes through their normal EF Core migration process.
 
 ## Admin UI & security
 

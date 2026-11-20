@@ -131,6 +131,27 @@ else
         </div>
       </section>
     }
+
+    @if (Model.CanSubscribe)
+    {
+      <section class="mt-5 pt-4 border-top" aria-label="Subscribe to new posts">
+        <h2 class="h4">Get new posts by email</h2>
+        <form method="post" asp-page-handler="Subscribe" asp-route-year="@published.Year" asp-route-month="@published.Month" asp-route-slug="@post.Slug" class="d-flex flex-column flex-sm-row gap-2">
+          <div class="flex-grow-1">
+            <label asp-for="SubscriptionEmail" class="form-label">Email address</label>
+            <input asp-for="SubscriptionEmail" type="email" class="form-control" autocomplete="email" />
+            <span asp-validation-for="SubscriptionEmail" class="text-danger"></span>
+          </div>
+          <div class="align-self-sm-end">
+            <button class="btn btn-primary" type="submit">Subscribe</button>
+          </div>
+        </form>
+        @if (!string.IsNullOrWhiteSpace(Model.SubscriptionMessage))
+        {
+          <p class="small mt-2 mb-0" role="status">@Model.SubscriptionMessage</p>
+        }
+      </section>
+    }
   </article>
 
   @section Metas {

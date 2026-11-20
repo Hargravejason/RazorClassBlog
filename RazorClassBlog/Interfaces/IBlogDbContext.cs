@@ -8,6 +8,7 @@ public interface IBlogDbContext: IDisposable
   DbSet<BlogPost> BlogPosts { get; }
   DbSet<BlogSubscriber> BlogSubscribers { get; }
   DbSet<BlogPostDelivery> BlogPostDeliveries { get; }
+  DbSet<BlogEmailTemplate> BlogEmailTemplates { get; }
 
   Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

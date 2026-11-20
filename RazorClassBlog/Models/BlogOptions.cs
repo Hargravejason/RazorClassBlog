@@ -98,7 +98,7 @@ public class BlogOptions
   /// </summary>
   public bool AllowPreviewOfPublishedPosts { get; set; } = false;
 
-  /// <summary>Absolute public site URL used in subscription emails. Defaults to the current request host.</summary>
+  /// <summary>Absolute canonical public site URL used to build subscription email links.</summary>
   public string? PublicBaseUrl { get; set; }
 
   /// <summary>Message included in the email asking subscribers to confirm their address.</summary>

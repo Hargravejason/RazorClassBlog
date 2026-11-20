@@ -1,0 +1,54 @@
+@page
+@model RazorClassBlog.Areas.BlogAdmin.SubscriptionEmailsModel
+@{
+  ViewData["Title"] = "Subscription email templates";
+}
+
+<h1>Subscription email templates</h1>
+<p>Templates are HTML. Placeholder values are HTML-encoded in message bodies.</p>
+@if (Model.StatusMessage is not null)
+{
+  <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+}
+
+<form method="post" class="d-grid gap-3">
+  <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+  <fieldset class="border rounded-3 p-3">
+    <legend class="float-none w-auto px-2">Email confirmation</legend>
+    <div class="mb-3">
+      <label asp-for="ConfirmationSubject" class="form-label">Subject</label>
+      <input asp-for="ConfirmationSubject" class="form-control" />
+      <span asp-validation-for="ConfirmationSubject" class="text-danger"></span>
+    </div>
+    <div>
+      <label asp-for="ConfirmationHtml" class="form-label">HTML body</label>
+      <textarea asp-for="ConfirmationHtml" class="form-control font-monospace" rows="8"></textarea>
+      <span asp-validation-for="ConfirmationHtml" class="text-danger"></span>
+      <small class="form-text">Placeholders: [Email], [ConfirmationMessage], [ConfirmationUrl].</small>
+    </div>
+  </fieldset>
+
+  <fieldset class="border rounded-3 p-3">
+    <legend class="float-none w-auto px-2">New post notification</legend>
+    <div class="mb-3">
+      <label asp-for="PostSubject" class="form-label">Subject</label>
+      <input asp-for="PostSubject" class="form-control" />
+      <span asp-validation-for="PostSubject" class="text-danger"></span>
+    </div>
+    <div>
+      <label asp-for="PostHtml" class="form-label">HTML body</label>
+      <textarea asp-for="PostHtml" class="form-control font-monospace" rows="12"></textarea>
+      <span asp-validation-for="PostHtml" class="text-danger"></span>
+      <small class="form-text">
+        Placeholders: [Email], [PostUrl], [UnsubscribeUrl], [Id], [BlogKey], [Title], [Slug],
+        [Summary], [HeroImageUrl], [Tags], [Status], [CreatedUtc], [PublishedUtc], [UpdatedUtc],
+        [AuthorId], [AuthorName], [DeletedUtc], [DeletedBy], [Content], [RelatedPostIds].
+      </small>
+    </div>
+  </fieldset>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary" type="submit">Save templates</button>
+    <a asp-page="Index" class="btn btn-outline-secondary">Back to blog admin</a>
+  </div>
+</form>
