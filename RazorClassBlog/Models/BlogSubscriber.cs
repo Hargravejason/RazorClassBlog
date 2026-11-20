@@ -10,4 +10,5 @@ public class BlogSubscriber
   public bool IsConfirmed { get; set; }
   public bool IsActive { get; set; }
   public DateTimeOffset CreatedUtc { get; set; } = DateTimeOffset.UtcNow;
+  public DateTimeOffset? LastUpdatedUtc { get; set; } = DateTimeOffset.UtcNow;
 }

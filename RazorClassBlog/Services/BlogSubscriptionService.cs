@@ -82,6 +82,7 @@ public class BlogSubscriptionService : IBlogSubscriptionService
     subscriber.ConfirmationTokenHash = null;
     subscriber.IsConfirmed = true;
     subscriber.IsActive = true;
+    subscriber.LastUpdatedUtc = DateTimeOffset.UtcNow;
     await _db.SaveChangesAsync(ct);
   }
 
@@ -106,6 +107,7 @@ public class BlogSubscriptionService : IBlogSubscriptionService
       return;
 
     subscriber.IsActive = false;
+    subscriber.LastUpdatedUtc = DateTimeOffset.UtcNow;
     await _db.SaveChangesAsync(ct);
   }
 
@@ -199,6 +201,9 @@ public class BlogSubscriptionService : IBlogSubscriptionService
 
     foreach (var subscriber in subscribers)
     {
+      if (publishedUtc <= (subscriber.LastUpdatedUtc ?? subscriber.CreatedUtc))
+        continue;
+
       //switched to countasync to support db systems like cosmosdb that don't support .AnyAsync
       var alreadySent = await _db.BlogPostDeliveries.CountAsync(
           d => d.BlogKey == post.BlogKey && d.SubscriberId == subscriber.Id && d.PostId == post.Id, ct);

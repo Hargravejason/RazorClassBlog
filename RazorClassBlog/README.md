@@ -185,7 +185,7 @@ An external cron job or background runner can distribute notifications for sched
 await subscriptionService.SendDuePostNotificationsAsync(DateTimeOffset.UtcNow, cancellationToken);
 ```
 
-The method finds non-deleted posts with `Published` status and `PublishedUtc` at or before the supplied time. It only sends to confirmed subscribers created before the post's publish time, and skips deliveries already recorded.
+The method finds non-deleted posts with `Published` status and `PublishedUtc` at or before the supplied time. It only sends to confirmed, active subscribers whose last subscription update (confirmation or unsubscribe) predates the post's publish time, and skips deliveries already recorded. Resubscribing reuses the existing subscriber record and refreshes its last-updated time when the new confirmation succeeds.
 
 The blog data context must expose `BlogSubscribers`, `BlogPostDeliveries`, and `BlogEmailTemplates` alongside `BlogPosts`. The supplied Cosmos context creates separate containers when its database is created. Hosts using SQL should apply the corresponding schema changes through their normal EF Core migration process.
 
