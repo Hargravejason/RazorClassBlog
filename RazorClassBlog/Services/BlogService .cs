@@ -9,11 +9,13 @@ namespace RazorClassBlog.Services;
 public class BlogService : IBlogService
 {
   private readonly IBlogRepository _repository;
+  private readonly IBlogSubscriptionService _subscriptions;
   private readonly BlogOptions _options;
 
-  public BlogService(IBlogRepository repository, IOptions<BlogOptions> options)
+  public BlogService(IBlogRepository repository, IBlogSubscriptionService subscriptions, IOptions<BlogOptions> options)
   {
     _repository = repository;
+    _subscriptions = subscriptions;
     _options = options.Value;
   }
 
@@ -73,7 +75,16 @@ public class BlogService : IBlogService
       post.AuthorId = authorId;
     }
 
-    return await _repository.SaveAsync(post, ct);
+    var saved = await _repository.SaveAsync(post, ct);
+    if (publish &&
+        saved.Status == BlogPostStatus.Published &&
+        saved.PublishedUtc <= now &&
+        saved.DeletedUtc is null)
+    {
+      await _subscriptions.SendPostToSubscribersAsync(saved, ct);
+    }
+
+    return saved;
   }
 
   public Task DeletePostAsync(string blogKey, string id, string userId, CancellationToken ct = default)

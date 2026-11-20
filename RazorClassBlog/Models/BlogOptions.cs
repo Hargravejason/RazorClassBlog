@@ -97,4 +97,13 @@ public class BlogOptions
   /// Allows previewing of posts that have been published, but not yet reached their scheduled publish date.
   /// </summary>
   public bool AllowPreviewOfPublishedPosts { get; set; } = false;
+
+  /// <summary>Absolute canonical public site URL used to build subscription email links.</summary>
+  public string? PublicBaseUrl { get; set; }
+
+  /// <summary>Message included in the email asking subscribers to confirm their address.</summary>
+  public string SubscriptionConfirmationMessage { get; set; } = "Please confirm your email address to receive new blog posts.";
+
+  /// <summary>Host-provided email delivery callback: recipient, subject, HTML body, cancellation token.</summary>
+  public Func<string, string, string, CancellationToken, Task>? SendEmailAsync { get; set; }
 }

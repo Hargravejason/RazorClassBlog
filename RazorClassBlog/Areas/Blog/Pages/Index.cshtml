@@ -77,6 +77,23 @@
   </div>
 
   <aside class="col-lg-4 mt-4 mt-lg-0">
+    @if (Model.CanSubscribe)
+    {
+      <div class="border rounded-3 p-3 mb-3">
+        <h2 class="h5">Get new posts by email</h2>
+        <form method="post" asp-page-handler="Subscribe" class="d-grid gap-2">
+          <label asp-for="Email" class="form-label">Email address</label>
+          <input asp-for="Email" type="email" class="form-control" autocomplete="email" />
+          <span asp-validation-for="Email" class="text-danger"></span>
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </form>
+        @if (!string.IsNullOrWhiteSpace(Model.SubscriptionMessage))
+        {
+          <p class="small mt-2 mb-0" role="status">@Model.SubscriptionMessage</p>
+        }
+      </div>
+    }
+
     <div class="border rounded-3 p-3 mb-3 bg-light">
       @* added a check to see if the public display name ends with 's', if so we drop 'this' because it doesnt fit in english well, but this may not cover every case *@
       <h2 class="h5">About @(!Options.Value.PublicDisplayName.EndsWith("s") ? "this" : "") @Options.Value.PublicDisplayName</h2>

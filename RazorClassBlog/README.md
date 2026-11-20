@@ -43,6 +43,7 @@ This was also a practical test to try an use AI (GPT5) to develop as much out of
 * Canonical URLs and meta descriptions
 * Structured data (BlogPosting / Article)
 * Open Graph & Twitter Card metadata
+* Optional email subscriptions with address confirmation, per-post delivery tracking, and confirmed unsubscribe
 
 ### Admin UI (optional for a public facing side, can be turned off)
 
@@ -160,6 +161,33 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
 ```
+
+### Email subscriptions
+
+Subscriptions are enabled when the host configures an email callback. The host remains responsible for sending mail through its chosen provider:
+
+```csharp
+options.PublicBaseUrl = builder.Configuration["Blogging:PublicBaseUrl"];
+options.SubscriptionConfirmationMessage = "Confirm your address to receive new articles.";
+options.SendEmailAsync = async (recipient, subject, htmlBody, cancellationToken) =>
+{
+    await yourEmailProvider.SendAsync(recipient, subject, htmlBody, cancellationToken);
+};
+```
+
+The public blog index and the end of each article display the subscription form when both `SendEmailAsync` and a valid `PublicBaseUrl` are configured. Subscribers must confirm their address before post notifications are sent. Delivery records prevent sending a post to the same subscriber again, and unsubscribe links require confirmation on the site. Set `PublicBaseUrl` to the canonical site origin (and application path, if applicable) so generated email links do not depend on an incoming request host.
+
+The authorized `/BlogAdmin/SubscriptionEmails` page configures the confirmation and post notification subject and HTML body. Templates support `[Email]`, `[ConfirmationMessage]`, and `[ConfirmationUrl]` for confirmation email. Post notification templates support `[Email]`, `[PostUrl]`, `[UnsubscribeUrl]`, and article fields such as `[Title]`, `[Summary]`, `[Content]`, `[AuthorName]`, `[Tags]`, and `[PublishedUtc]`; the admin page lists all supported fields. Placeholder values are HTML-encoded in bodies.
+
+An external cron job or background runner can distribute notifications for scheduled posts by resolving the subscription service and calling:
+
+```csharp
+await subscriptionService.SendDuePostNotificationsAsync(DateTimeOffset.UtcNow, cancellationToken);
+```
+
+The method finds non-deleted posts with `Published` status and `PublishedUtc` at or before the supplied time. It only sends to confirmed, active subscribers whose last subscription update (confirmation or unsubscribe) predates the post's publish time, and skips deliveries already recorded. Resubscribing reuses the existing subscriber record and refreshes its last-updated time when the new confirmation succeeds.
+
+The blog data context must expose `BlogSubscribers`, `BlogPostDeliveries`, and `BlogEmailTemplates` alongside `BlogPosts`. The supplied Cosmos context creates separate containers when its database is created. Hosts using SQL should apply the corresponding schema changes through their normal EF Core migration process.
 
 ## Admin UI & security
 

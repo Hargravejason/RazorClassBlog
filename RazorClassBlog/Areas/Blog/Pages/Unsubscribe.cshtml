@@ -1,0 +1,23 @@
+@page "/Unsubscribe"
+@model RazorClassBlog.Areas.Blog.Pages.UnsubscribeModel
+@{
+  ViewData["Title"] = "Unsubscribe";
+}
+
+<h1>Unsubscribe</h1>
+@if (Model.Message is not null)
+{
+  <p role="status">@Model.Message</p>
+}
+else if (Model.IsValid)
+{
+  <p>Confirm that you want to stop receiving new blog posts by email.</p>
+  <form method="post">
+    <input type="hidden" asp-for="Token" />
+    <button class="btn btn-danger" type="submit">Confirm unsubscribe</button>
+  </form>
+}
+else
+{
+  <p>This unsubscribe link is invalid or has expired.</p>
+}

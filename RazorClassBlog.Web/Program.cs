@@ -35,6 +35,7 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
   options.RecentPostsLayout = "horizontal";            // default layout in widget: "vertical" or "horizontal"
   options.DefaultOrganizationName = "Acme Aces";        // default author name if no user info available
   options.DefaultOrganizationImageURL = "https://cdn.AcmeAces.com/images/acme-aces-logo.png"; // default author image if no user info available
+  options.PublicBaseUrl = builder.Configuration["Blogging:PublicBaseUrl"];
   //options.EnableAdminUi = false;                      // option to completely disable the admin UI - useful if you have a separate admin app
   //options.AdminRoles = new[] { "User", "BlogAdmin" }; // permssions to manage blog
   //options.ReaderRoles = new[] { "User", "Customer" }; // permission to be considered a "reader" (e.g. can comment)
@@ -49,6 +50,13 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
   // when true, allows posts that are already published to be previewed on the live site before they go live. When false, only unpublished posts can be previewed. 
   // this is useful to allow content editors to preview changes in the live site before its publically found.
   options.AllowPreviewOfPublishedPosts = true;
+
+  options.PublicBaseUrl = builder.Configuration["Blogging:PublicBaseUrl"];
+  options.SubscriptionConfirmationMessage = "Confirm your address to receive new articles.";
+  options.SendEmailAsync = async (recipient, subject, htmlBody, cancellationToken) =>
+  {
+    Console.WriteLine($"Email sent to {recipient} with subject '{subject}'\n\n{htmlBody}");
+  };
 });
 
 var app = builder.Build();
