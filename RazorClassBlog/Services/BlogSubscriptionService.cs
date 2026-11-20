@@ -186,12 +186,17 @@ public class BlogSubscriptionService : IBlogSubscriptionService
     if (sendEmail is null)
       return;
 
-    var publishedUtc = post.PublishedUtc ?? post.CreatedUtc;
+    var publishedUtc = post.PublishedUtc;
+
+    //bounce out if the post is not published
+    if (publishedUtc is null)
+      return;
+
     var subscribers = await _db.BlogSubscribers
         .Where(s => s.BlogKey == post.BlogKey &&
                     s.IsConfirmed &&
                     s.IsActive &&
-                    s.CreatedUtc < publishedUtc)
+                    s.LastUpdatedUtc < publishedUtc)
         .ToListAsync(ct);
     if (subscribers.Count == 0)
       return;
