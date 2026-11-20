@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2025</Copyright>
 
-		<VersionPrefix>1.0.6</VersionPrefix>
-		<PackageReleaseNotes>Updated hero image sizing to "Contain" so that images uploaded with weird sizes fit in the boxed area. This replaces the previous "Scale-Down" behavior, which caused some images to be too small.</PackageReleaseNotes>
+		<VersionPrefix>1.1.0</VersionPrefix>
+		<PackageReleaseNotes>Updated system to allow subscribing to posts. Updated posts to show as "News" rather than "Blogs"</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
