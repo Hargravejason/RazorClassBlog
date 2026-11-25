@@ -107,6 +107,20 @@ builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
         builder.Configuration["Cosmos:DatabaseName"]));
 ```
 
+For Cosmos, configure `BlogPost.PostPartitionKey` as the `BlogPosts` container's
+partition key (the sample context explicitly maps the otherwise unmapped property).
+The repository sets it to `{BlogKey}-{Id}` for new posts; `BlogKey` remains the
+logical blog identifier used for queries. Reads by blog or slug span partitions.
+Other Cosmos containers still use `BlogKey` and may need their own partitioning
+strategy at scale.
+
+Existing Cosmos containers cannot change partition keys in place. Before deploying
+this configuration, copy posts to a new container partitioned on
+`/PostPartitionKey`, setting that property to `{BlogKey}-{Id}` on every document,
+then point the host's context at the new container. Preserve each document's `id`
+and `BlogKey`. `EnsureCreated` does not migrate an existing container. Direct
+writers must also supply the same partition key. SQL hosts need no new column.
+
 ### Register services
 
 Most of the configuration happens during service registration. 

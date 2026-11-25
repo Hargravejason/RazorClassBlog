@@ -93,12 +93,13 @@ public class BlogRepository : IBlogRepository
 
   public async Task<BlogPost> SaveAsync(BlogPost post, CancellationToken ct = default)
   {
+    post.PostPartitionKey = $"{post.BlogKey}-{post.Id}";
     // string Id: empty/null means new
     var existing = await _db.BlogPosts.FirstOrDefaultAsync(p => p.Id == post.Id && p.BlogKey == post.BlogKey, ct);
 
     if (existing == null)
     {
-      existing = new BlogPost() { Id = post.Id, CreatedUtc = DateTime.UtcNow, BlogKey = post.BlogKey };
+      existing = new BlogPost() { Id = post.Id, CreatedUtc = DateTime.UtcNow, BlogKey = post.BlogKey, PostPartitionKey = post.PostPartitionKey };
       _db.BlogPosts.Add(existing);
     }
 

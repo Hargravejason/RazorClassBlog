@@ -22,7 +22,8 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
     var blog = modelBuilder.Entity<BlogPost>();
 
     blog.ToContainer("BlogPosts");          // Cosmos-specific
-    blog.HasPartitionKey(p => p.BlogKey);   // choose your partition key
+    blog.Property(p => p.PostPartitionKey);
+    blog.HasPartitionKey(p => p.PostPartitionKey);
     blog.HasNoDiscriminator();
 
     var subscribers = modelBuilder.Entity<BlogSubscriber>();
