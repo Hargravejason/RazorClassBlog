@@ -107,6 +107,26 @@ builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
         builder.Configuration["Cosmos:DatabaseName"]));
 ```
 
+The sample Cosmos context partitions `BlogPostDeliveries` by
+`DeliveryPartitionKey`, set to `{BlogKey}-{PostId}` by the subscription service.
+Deliveries for the same blog and post share a partition; different posts can
+be distributed across partitions. A highly popular post can still create a hot
+partition.
+Delivery checks and unsubscribe token lookups continue to filter by `BlogKey`
+and may query across partitions.
+
+Existing Cosmos containers cannot change partition keys in place. Stop
+notification sending and other delivery writes during migration and cutover.
+Copy all delivery documents to a new container partitioned on
+`/DeliveryPartitionKey`, setting that field to `{BlogKey}-{PostId}` for each
+document and preserving their IDs, blog keys, subscriber IDs, post IDs, and
+unsubscribe token hashes.
+Verify the copy and point the host's context at the new container before
+resuming writes. `EnsureCreated` does not migrate an existing container.
+Direct writers must also populate the key. SQL hosts need no schema change for
+this partitioning update; custom Cosmos contexts must explicitly map the
+otherwise unmapped property and configure it as the partition key.
+
 ### Register services
 
 Most of the configuration happens during service registration. 

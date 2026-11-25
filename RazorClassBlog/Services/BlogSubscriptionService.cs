@@ -228,6 +228,7 @@ public class BlogSubscriptionService : IBlogSubscriptionService
         BlogKey = post.BlogKey,
         SubscriberId = subscriber.Id,
         PostId = post.Id,
+        DeliveryPartitionKey = $"{post.BlogKey}-{post.Id}",
         UnsubscribeTokenHash = HashToken(token),
         SentUtc = DateTimeOffset.UtcNow
       });
