@@ -29,7 +29,7 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
 {
   options.PublicRoutePrefix = "/articles";              // default; change if you want a different public blog route
   options.PublicDisplayName = "Articles";               // default; change if you want a different public blog name
-  options.SetBlogTypes<BlogType>();                     // replace BlogType with a host-defined enum if needed
+  options.SetBlogTypes<BlogType>();              // replace BlogType with a host-defined enum if needed
   options.BlogKey = "main";                             // default; change if you want multiple blogs later
   options.PublicPageSize = 5;                           // show 5 posts per page publicly
   options.AdminPageSize = 25;                           // show 25 in admin list
@@ -134,3 +134,5 @@ app.MapGet("/sitemap.xml", async (HttpContext http, IBlogService blogService, Ca
 });
 
 app.Run();
+
+

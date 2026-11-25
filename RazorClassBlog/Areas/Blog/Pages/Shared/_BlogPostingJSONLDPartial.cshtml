@@ -12,43 +12,71 @@
   string? heroImageUrl = Model.HeroImageUrl ?? Options.Value.DefaultOrganizationImageURL;
   var request = HttpContextAccessor.HttpContext?.Request;
   var blogUrl = Url.Page("Index", null, new { area = "Blog" }, protocol: request?.Scheme);
-}
-<script type="application/ld+json">
+
+  var organizationName = Options.Value.DefaultOrganizationName;
+  var authorName = Model.AuthorName ?? organizationName ?? "Unknown";
+  var canonicalUrl = ViewData["canonical"]?.ToString();
+  var description = ViewData["Description"]?.ToString();
+
+  var published = Model.PublishedUtc ?? Model.CreatedUtc;
+  var modified = Model.UpdatedUtc ?? published;
+
+  // Maps the enum to the appropriate Schema.org type.
+  var schemaType = Options.Value.ResolveBlogType(Model.BlogType);
+
+  var article = new Dictionary<string, object?>
   {
-    "@@context": "https://schema.org",
-    "@@type": @Html.Raw(JsonSerializer.Serialize(Options.Value.ResolveBlogType(Model.BlogType))),
-    "headline": "@Model.Title",
-    "description":"@ViewData["Description"]",
-    "datePublished": "@(Model.PublishedUtc?.UtcDateTime.ToString("O") ?? Model.CreatedUtc.UtcDateTime.ToString("O"))",
-    "dateModified": "@(Model.UpdatedUtc?.UtcDateTime.ToString("O") ?? Model.CreatedUtc.UtcDateTime.ToString("O"))",
-    "author": {
-      "@@type": "@(Model.AuthorName == Options.Value.DefaultOrganizationName ? "Organization" : "Person")",
-      "name": "@(Model.AuthorName ?? Options.Value.DefaultOrganizationName ?? "Unknown")"
+    ["@context"] = "https://schema.org",
+    ["@type"] = schemaType,
+    ["@id"] = $"{canonicalUrl}#article",
+    ["headline"] = Model.Title,
+    ["description"] = description,
+    ["url"] = canonicalUrl,
+    ["mainEntityOfPage"] = new Dictionary<string, object?>
+    {
+      ["@type"] = "WebPage",
+      ["@id"] = canonicalUrl
     },
-    "publisher": {
-      "@@type": "Organization",
-      "name": "@Options.Value.DefaultOrganizationName",
-      "logo": {
-        "@@type": "ImageObject",
-        "url": "@Options.Value.DefaultOrganizationImageURL"
+    ["datePublished"] = published.UtcDateTime.ToString("O"),
+    ["dateModified"] = modified.UtcDateTime.ToString("O"),
+    ["inLanguage"] = "en-US",
+    ["author"] = new Dictionary<string, object?>
+    {
+      ["@type"] = authorName == organizationName ? "Organization" : "Person",
+      ["name"] = authorName
+    },
+    ["publisher"] = new Dictionary<string, object?>
+    {
+      ["@type"] = "Organization",
+      ["name"] = organizationName,
+      ["logo"] = new Dictionary<string, object?>
+      {
+        ["@type"] = "ImageObject",
+        ["url"] = Options.Value.DefaultOrganizationImageURL
       }
     },
-    @if (!string.IsNullOrEmpty(heroImageUrl))
+    ["isPartOf"] = new Dictionary<string, object?>
     {
-        <text>
-      "image": [
-        "@heroImageUrl"
-      ],
-        </text>
+      ["@type"] = "WebSite",
+      ["name"] = Options.Value.PublicDisplayName,
+      ["url"] = blogUrl
     }
-    "isPartOf": {
-      "@@type": "Blog",
-      "name": "@Options.Value.PublicDisplayName",
-      "url": "@blogUrl"
-    },
-    "mainEntityOfPage": {
-      "@@type": "WebPage",
-      "@@id": "@ViewData["canonical"]"
-    }
+  };
+
+  if (!string.IsNullOrWhiteSpace(heroImageUrl))
+  {
+    article["image"] = new[] { heroImageUrl };
   }
+
+  // Optional: Mark freely accessible articles.
+  article["isAccessibleForFree"] = true;
+
+  var json = JsonSerializer.Serialize(article, new JsonSerializerOptions
+  {
+    WriteIndented = true
+  });
+}
+
+<script type="application/ld+json">
+  @Html.Raw(json)
 </script>

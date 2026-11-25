@@ -18,8 +18,8 @@
 		<Authors>Jason Hargrave</Authors>
 		<Copyright>2026</Copyright>
 
-		<VersionPrefix>1.1.0</VersionPrefix>
-		<PackageReleaseNotes>Updated system to allow subscribing to posts.</PackageReleaseNotes>
+		<VersionPrefix>1.1.1</VersionPrefix>
+		<PackageReleaseNotes>Added in ability to flag posts as different types for ld+json reporting.</PackageReleaseNotes>
 		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		
