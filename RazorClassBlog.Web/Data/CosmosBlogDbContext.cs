@@ -32,7 +32,8 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
 
     var deliveries = modelBuilder.Entity<BlogPostDelivery>();
     deliveries.ToContainer("BlogPostDeliveries");
-    deliveries.HasPartitionKey(d => d.Id);
+    deliveries.Property(d => d.DeliveryPartitionKey);
+    deliveries.HasPartitionKey(d => d.DeliveryPartitionKey);
     deliveries.HasNoDiscriminator();
 
     var emailTemplates = modelBuilder.Entity<BlogEmailTemplate>();
