@@ -22,8 +22,7 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
     var blog = modelBuilder.Entity<BlogPost>();
 
     blog.ToContainer("BlogPosts");          // Cosmos-specific
-    blog.Property(p => p.PostPartitionKey);
-    blog.HasPartitionKey(p => p.PostPartitionKey);
+    blog.HasPartitionKey(p => p.BlogKey);   // choose your partition key
     blog.HasNoDiscriminator();
 
     var subscribers = modelBuilder.Entity<BlogSubscriber>();
@@ -33,7 +32,7 @@ public class CosmosBlogDbContext : DbContext, IBlogDbContext
 
     var deliveries = modelBuilder.Entity<BlogPostDelivery>();
     deliveries.ToContainer("BlogPostDeliveries");
-    deliveries.HasPartitionKey(d => d.BlogKey);
+    deliveries.HasPartitionKey(d => d.Id);
     deliveries.HasNoDiscriminator();
 
     var emailTemplates = modelBuilder.Entity<BlogEmailTemplate>();

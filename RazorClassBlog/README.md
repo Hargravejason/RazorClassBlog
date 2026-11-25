@@ -107,22 +107,19 @@ builder.Services.AddDbContext<CosmosBlogDbContext>(options =>
         builder.Configuration["Cosmos:DatabaseName"]));
 ```
 
-For Cosmos, configure `BlogPost.PostPartitionKey` as the `BlogPosts` container's
-partition key (the sample context explicitly maps the otherwise unmapped property).
-The repository sets it to `{BlogKey}-{Id}` for new posts; `BlogKey` remains the
-logical blog identifier used for queries. Repository reads, including ID lookups,
-span partitions and can incur higher request costs.
-Other Cosmos containers still use `BlogKey` and may need their own partitioning
-strategy at scale.
+The sample Cosmos context partitions `BlogPostDeliveries` by the delivery `id`.
+The subscription service generates a distinct deterministic ID for each
+subscriber and post, distributing deliveries for the same blog and post.
+Delivery checks and unsubscribe token lookups continue to filter by `BlogKey`
+and may query across partitions.
 
-Existing Cosmos containers cannot change partition keys in place. Before deploying
-this configuration, stop post writes through migration and cutover, then copy
-posts to a new container partitioned on
-`/PostPartitionKey`, setting that property to `{BlogKey}-{Id}` on every document,
-then point the host's context at the new container. Preserve each document's `id`
-and `BlogKey`. Resume writes only after the host points to the new container.
-`EnsureCreated` does not migrate an existing container. Direct writers must also
-supply the same partition key. SQL hosts need no new column.
+Existing Cosmos containers cannot change partition keys in place. Stop
+notification sending and other delivery writes during migration and cutover.
+Copy all delivery documents to a new container partitioned on `/id`, preserving
+their IDs, blog keys, subscriber IDs, post IDs, and unsubscribe token hashes.
+Verify the copy and point the host's context at the new container before
+resuming writes. `EnsureCreated` does not migrate an existing container.
+SQL hosts need no schema change for this partitioning update.
 
 ### Register services
 
