@@ -4,6 +4,9 @@ namespace RazorClassBlog.Models;
 
 public class BlogPost : BlogPostMini
 {
+  /// <summary>Configured enum member name used as the schema.org type; null for legacy posts.</summary>
+  public string? BlogType { get; set; }
+
   /// <summary>Main body; Markdown or HTML.</summary>
   public string Content { get; set; } = string.Empty;
 

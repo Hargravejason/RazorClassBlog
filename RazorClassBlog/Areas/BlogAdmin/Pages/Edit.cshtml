@@ -66,6 +66,21 @@
 				<h2 class="h6 mb-3">Publishing</h2>
 
 				<div class="mb-3">
+					<label asp-for="Post.BlogType" class="form-label">Blog type</label>
+					<select asp-for="Post.BlogType" class="form-select">
+						@if (!string.IsNullOrWhiteSpace(Model.Post.BlogType) && !Model.BlogTypes.Contains(Model.Post.BlogType))
+						{
+							<option value="@Model.Post.BlogType">@Model.Post.BlogType (no longer available)</option>
+						}
+						@foreach (var type in Model.BlogTypes)
+						{
+							<option value="@type">@type</option>
+						}
+					</select>
+					<span asp-validation-for="Post.BlogType" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
 					<label asp-for="Post.AuthorName" class="form-label">Author</label>
 					<input asp-for="Post.AuthorName" class="form-control" />
 					<span class="form-text">

@@ -53,6 +53,10 @@ public class BlogService : IBlogService
 
   public async Task<BlogPost> CreateOrUpdatePostAsync(BlogPost post, bool publish, string? authorId, CancellationToken ct = default)
   {
+    post.BlogType = _options.ResolveBlogType(post.BlogType);
+    if (!_options.BlogTypes.Contains(post.BlogType))
+      throw new ArgumentException("The blog type must be one of the configured types.", nameof(post));
+
     if (string.IsNullOrWhiteSpace(post.BlogKey))
       post.BlogKey = _options.BlogKey;
 
