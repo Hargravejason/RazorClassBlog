@@ -116,6 +116,7 @@ Ensure you pass the `IBlogDbContext` abstraction object context in that you used
 builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
 {
   options.BlogKey = "main";       // default; change if you plan on having multiple blogs in one database
+  options.SetBlogTypes<BlogType>(); // using RazorClassBlog.EnumsandConstants; or use your own enum
   options.PublicPageSize = 10;    // default; change if you want to show more per page on the public facing side
   options.AdminPageSize = 20;     // default; change if you want to show more per page in the admin facing side
 
@@ -145,6 +146,22 @@ builder.Services.AddBlogging<CosmosBlogDbContext>(options =>
   options.AllowPreviewOfPublishedPosts = true; 
 });
 ```
+
+### Post types and JSON-LD
+
+The default `BlogType` enum contains `BlogPosting`, `Article`, and `NewsArticle`.
+Use `options.SetBlogTypes<YourEnum>()` to supply a host-defined enum. Its member
+names populate the admin dropdown and are emitted as the schema.org `@type` in
+`_BlogPostingJSONLDPartial.cshtml`, so use valid schema.org type names. Enum
+members are ordered by their underlying numeric values; the first is used for
+new posts and existing posts with no type. The selected name is stored as a
+string, so keep names stable when changing the enum. The host can override the
+partial to customize the rest of the JSON-LD output.
+
+Existing SQL databases need a nullable `BlogType` column on `BlogPosts` through
+the host's normal migration process before deploying this change. Existing
+Cosmos documents need no migration; missing or null values use the configured
+first type.
 
 Ensure Razor Pages, Identity, and Authorization are enabled:
 

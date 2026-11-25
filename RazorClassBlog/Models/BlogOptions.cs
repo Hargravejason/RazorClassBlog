@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RazorClassBlog.EnumsandConstants;
 using RazorClassBlog.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,6 +7,22 @@ namespace RazorClassBlog.Models;
 
 public class BlogOptions
 {
+  /// <summary>Enum member names available for posts and used as schema.org types.</summary>
+  public IReadOnlyList<string> BlogTypes { get; private set; } = Enum.GetNames<BlogType>();
+
+  /// <summary>Configure post types from a host-defined enum. The first member is the default.</summary>
+  public void SetBlogTypes<TEnum>() where TEnum : struct, Enum
+  {
+    var names = Enum.GetNames<TEnum>();
+    if (names.Length == 0)
+      throw new ArgumentException("The blog type enum must contain at least one member.");
+    BlogTypes = names;
+  }
+
+  /// <summary>Resolve missing legacy values to the first configured type.</summary>
+  public string ResolveBlogType(string? type) =>
+    string.IsNullOrWhiteSpace(type) ? BlogTypes[0] : type;
+
   /// <summary>
   /// Default logical blog partition. Useful if you ever want multiple blogs.
   /// </summary>

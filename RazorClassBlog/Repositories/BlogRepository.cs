@@ -107,6 +107,7 @@ public class BlogRepository : IBlogRepository
     existing.UpdatedUtc = DateTime.UtcNow;
     existing.PublishedUtc = post.PublishedUtc.HasValue ? post.PublishedUtc.Value.ToUniversalTime() : null;
     existing.Status = post.Status;
+    existing.BlogType = post.BlogType;
     existing.Title = post.Title;
     existing.Slug = post.Slug;
     existing.Content = post.Content;

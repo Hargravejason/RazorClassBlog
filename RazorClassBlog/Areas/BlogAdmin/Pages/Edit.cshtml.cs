@@ -28,6 +28,8 @@ public class EditModel : PageModel
   /// </summary>
   public bool ImageUploadEnabled => _blobStorage.IsConfigured;
 
+  public IReadOnlyList<string> BlogTypes => _options.BlogTypes;
+
   /// <summary>
   /// Images previously uploaded for the current post.
   /// Populated on GET (when editing an existing post) and after a successful upload.
@@ -64,6 +66,7 @@ public class EditModel : PageModel
         return NotFound();
 
       Post = existing;
+      Post.BlogType = _options.ResolveBlogType(Post.BlogType);
       Publish = Post.Status == BlogPostStatus.Published;
       TagsCsv = Post.Tags is { Count: > 0 }
           ? string.Join(", ", Post.Tags)
@@ -77,6 +80,7 @@ public class EditModel : PageModel
       Post = new BlogPost
       {
         BlogKey = _options.BlogKey,
+        BlogType = _options.ResolveBlogType(null),
         CreatedUtc = DateTimeOffset.UtcNow,
         Status = BlogPostStatus.Draft
       };
@@ -98,8 +102,12 @@ public class EditModel : PageModel
 
   public async Task<IActionResult> OnPostAsync(CancellationToken ct)
   {
+    ValidateBlogType();
     if (!ModelState.IsValid)
+    {
+      await LoadAvailablePostsForRelatedAsync(ct);
       return Page();
+    }
 
     Post.BlogKey ??= _options.BlogKey;
 
@@ -127,6 +135,10 @@ public class EditModel : PageModel
 
   public async Task<IActionResult> OnPostAutosaveAsync(CancellationToken ct)
   {
+    ValidateBlogType();
+    if (ModelState.GetFieldValidationState("Post.BlogType") == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
+      return BadRequest("Invalid blog type.");
+
     Post.BlogKey ??= _options.BlogKey;
 
     Post.Tags = string.IsNullOrWhiteSpace(TagsCsv)
@@ -218,6 +230,13 @@ public class EditModel : PageModel
   {
     var allPublished = await _blogService.GetAllPublishedPostsAsync(_options.BlogKey, ct);
     AvailablePostsForRelated = allPublished.Where(p => p.Id != Post.Id).ToList();
+  }
+
+  private void ValidateBlogType()
+  {
+    Post.BlogType = _options.ResolveBlogType(Post.BlogType);
+    if (!BlogTypes.Contains(Post.BlogType))
+      ModelState.AddModelError("Post.BlogType", "Select a valid blog type.");
   }
 
 }

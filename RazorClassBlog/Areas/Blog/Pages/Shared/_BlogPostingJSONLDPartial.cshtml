@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Http
 @using Microsoft.Extensions.Options
+@using System.Text.Json
 @model RazorClassBlog.Models.BlogPost;
 @inject IOptions<BlogOptions> Options;
 @inject IHttpContextAccessor HttpContextAccessor
@@ -15,7 +16,7 @@
 <script type="application/ld+json">
   {
     "@@context": "https://schema.org",
-    "@@type": "BlogPosting",
+    "@@type": @Html.Raw(JsonSerializer.Serialize(Options.Value.ResolveBlogType(Model.BlogType))),
     "headline": "@Model.Title",
     "description":"@ViewData["Description"]",
     "datePublished": "@(Model.PublishedUtc?.UtcDateTime.ToString("O") ?? Model.CreatedUtc.UtcDateTime.ToString("O"))",
